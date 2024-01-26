@@ -60,13 +60,6 @@ Introduzione
 
 (Il problema, software oggigiorno, l'importanza della qualità del software e altre caratteristiche di ingegneria del software, come automatizzare migliora la qualità eliminando l'intervento umano)
 
-\begin{figure}
-	\centering
-	\includegraphics[width=.8\linewidth]{figures/random-image.pdf}
-	\caption{Some random image}
-	\label{fig:random-image}
-\end{figure}
-
 \section{Contesto}
 
 (Un'introduzione teorica degli elementi sotto elencati, cosa servono, esempi di software che risolvono questo problema, evoluzione di questi negli ultimi anni )
@@ -92,24 +85,24 @@ Il progetto si pone tre principali obiettivi:
 	\item La pubblicazione automatica dei rilasci all'interno dell'\ac{aur}
 	\item Lo sviluppo di una \ac{cli} per interagire con il simulatore
 \end{itemize}
-
-% JRE-Embed
-Le applicazioni basate sulla \ac{jvm} necessitano di un \ac{jre}, ovvero un insieme di librerie e componenti che ne permettono l'esecuzione. L'utente potrebbe non aver alcun \ac{jre} installato sul proprio dispositivo oppure quello presente potrebbe essere obsoleto. Una soluzione consiste nel distribuire la propria applicazione assieme ad un \ac{jre} risultando in un maggiore controllo sull'ambiente di esecuzione e la semplificazione dell'installazione dell'applicativo, a discapito di un aumento delle dimensioni del software. La pacchettizzazione 
+Per integrazione di un \ac{jre} si intende l'aggiunta di una \ac{jvm}, spesso ridotta di dimensioni, all'interno del pacchetto di installazione.
+L'utente potrebbe non aver alcun \ac{jre} installato sul proprio dispositivo oppure quello presente potrebbe essere obsoleto. Inserendo una macchina virtuale Java: si fornisce uno specifico ambiente di esecuzione eliminando possibili problemi di compatibilità e si semplifica la procedura di installazione per l'end-user. L'avvio dell'applicazione è delegato ad un file eseguibile nativo della piattaforma.
 
 \section{Requisiti}
 
 \subsection{Requisiti funzionali}
+
+Il codice di Alchemist è ospitato nella piattaforma GitHub ed utilizza la funzionalità denominata GitHub Actions per orchestrare un flusso di integrazione e rilascio continuo. 
+
 \begin{itemize}
-	\item L'automazione della generazione di pacchetti di installazione multi-piattaforma con \ac{jre} integrato
-	\item La pubblicazione automatica dei rilasci all'interno dell'\ac{aur}
-	\item Lo sviluppo di una \ac{cli} per interagire con il simulatore
+	\item Generazione dei pacchetti di installazione per i maggiori sistemi operativi: Linux, MacOS e Windows
+	\item 
 \end{itemize}
 
 \subsection{Requisiti non funzionali}
 \begin{itemize}
-	\item L'automazione della generazione di pacchetti di installazione multi-piattaforma con \ac{jre} integrato
-	\item La pubblicazione automatica dei rilasci all'interno dell'\ac{aur}
-	\item Lo sviluppo di una \ac{cli} per interagire con il simulatore
+	\item L'aggiornamento non deve incrementare il tempo di esecuzione della pipeline
+	\item 
 \end{itemize}
 
 \section{Strumenti}
@@ -126,7 +119,7 @@ Le applicazioni basate sulla \ac{jvm} necessitano di un \ac{jre}, ovvero un insi
 Interazione tra gradle e github actions, l’attuale struttura della pipeline di alchemist, le aggiunte che sono state fatte..
 
 \section{Impacchettamento}
-Discussione sulla scelta del software di packaging, il packaging di un progetto JVM, vantaggi / svantaggi
+Discussione sulla scelta del software di packaging, vantaggi / svantaggi
 
 \subsection{GraalVM}
 
@@ -149,10 +142,10 @@ Discussione design della terza parte
 
 \chapter{Implementazione}
 
-\begin{list}{possibili inserimenti}{spacing}
+\begin{itemize}
 	\item Particolari design nell'interfaccia CLI
 	\item Esempi
-\end{list}
+\end{itemize}
 
 \chapter{Conclusioni}
 
