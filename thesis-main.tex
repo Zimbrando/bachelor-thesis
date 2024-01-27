@@ -24,6 +24,7 @@
 \acrodef{jvm}[JVM]{Java Virtual Machine}
 \acrodef{jre}[JRE]{Java Runtime Environment}
 \acrodef{aur}[AUR]{Arch User Repository}
+\acrodef{dsl}[DSL]{Domain-Specific Language}
 
 \mainlinespacing{1.241} % line spacing in mainmatter, comment to default (1)
 
@@ -60,6 +61,7 @@ Introduzione
 
 (Il problema, software oggigiorno, l'importanza della qualità del software e altre caratteristiche di ingegneria del software, come automatizzare migliora la qualità eliminando l'intervento umano)
 
+s
 \section{Contesto}
 
 (Un'introduzione teorica degli elementi sotto elencati, cosa servono, esempi di software che risolvono questo problema, evoluzione di questi negli ultimi anni )
@@ -67,6 +69,8 @@ Introduzione
 \subsection{Build automation}
 \subsection{Continuous integration}
 \subsection{Continuous delivery}
+\paragraph{Pipeline}
+
 \subsection{Alchemist}
 
 (Cos'è alchemist, utilizzo, tecnologie utilizzate, architettura, progettazione)
@@ -81,33 +85,51 @@ La struttura di questo paper
 
 Il progetto si pone tre principali obiettivi:
 \begin{itemize}
-	\item L'automazione della generazione di pacchetti di installazione multi-piattaforma con \ac{jre} integrato
+	\setlength\itemsep{0.8em}
+	\item La generazione automatica di pacchetti di installazione multi-piattaforma \\ con \ac{jre} integrato
 	\item La pubblicazione automatica dei rilasci all'interno dell'\ac{aur}
 	\item Lo sviluppo di una \ac{cli} per interagire con il simulatore
 \end{itemize}
-Per integrazione di un \ac{jre} si intende l'aggiunta di una \ac{jvm}, spesso ridotta di dimensioni, all'interno del pacchetto di installazione.
-L'utente potrebbe non aver alcun \ac{jre} installato sul proprio dispositivo oppure quello presente potrebbe essere obsoleto. Inserendo una macchina virtuale Java: si fornisce uno specifico ambiente di esecuzione eliminando possibili problemi di compatibilità e si semplifica la procedura di installazione per l'end-user. L'avvio dell'applicazione è delegato ad un file eseguibile nativo della piattaforma.
+Con integrazione di un \ac{jre} si intende il supplemento di una \ac{jvm}, frequentemente ridotta di dimensioni, all'interno del pacchetto di installazione.
+L'utente potrebbe non aver alcun \ac{jre} installato sul proprio dispositivo, oppure quello presente potrebbe essere obsoleto. Inserendo una macchina virtuale Java: si fornisce uno specifico ambiente di esecuzione, eliminando potenziali problemi di compatibilità e si agevola la procedura di installazione per l'end-user. L'avvio dell'applicazione è delegato ad un file eseguibile nativo della piattaforma. [Trasparenza riguardo l'utilizzo di una JVM, comodità di un file eseguibile nativo]
 
 \section{Requisiti}
 
-\subsection{Requisiti funzionali}
-
 Il codice di Alchemist è ospitato nella piattaforma GitHub ed utilizza la funzionalità denominata GitHub Actions per orchestrare un flusso di integrazione e rilascio continuo. 
 
+\paragraph{Requisiti funzionali}
+
+Le funzionalità richieste si possono classificare in due gruppi distinti: uno di questi contiene tutto ciò che concerne l'esperienza dell'utente finale, mentre il secondo descrive le funzionalità dal punto di vista degli sviluppatori e contributori di Alchemist.
 \begin{itemize}
-	\item Generazione dei pacchetti di installazione per i maggiori sistemi operativi: Linux, MacOS e Windows
-	\item 
+	\item \textbf{Multi-piattaforma}: Alchemist deve essere installabile sui maggiori sistemi operativi in circolazione come Windows, MacOS e le principali distribuzioni Linux (Debian, Fedora, Arch).
+	\item \textbf{Usabilità}: il simulatore deve fornire un'interfaccia \ac{cli} completa, ovvero che permetta l'utilizzo di tutte le sue funzionalità.
 \end{itemize}
 
-\subsection{Requisiti non funzionali}
+I requisiti del gruppo successivo sono accumunabili per il loro scopo, vale a dire l'automazione. L'introduzione di processi automatici minimizza la probabilità di errare eliminando l'intervento umano. 
+
 \begin{itemize}
-	\item L'aggiornamento non deve incrementare il tempo di esecuzione della pipeline
-	\item 
+	\item \textbf{Automazione dei pacchetti}: la generazione dei pacchetti di installazione deve essere automatica e configurabile
+	\item \textbf{Automazione della distribuzione}: il rilascio di una nuova versione deve fornire i pacchetti all'interno di GitHub e pubblicare l'aggiornamento nell'\ac{aur}.
+	\item \textbf{Verifica funzionamento}: entrambi i processi descritti precedentemente devono essere corredati da verifiche del loro funzionamento e devono bloccare la procedura di rilascio nell'eventualità siano presenti errori.
+\end{itemize}
+
+\paragraph{Requisiti non funzionali}
+
+\begin{itemize}
+	\item Trattandosi Alchemist di un software attualmente ed in continuo sviluppo, è auspicabile l'utilizzo degli strumenti già integrati all'interno del repositorio. L'integrazione di nuovi applicativi deve essere eseguita solo se strettamente necessaria.
+	\item La pipeline aggiornata deve assicurare tempi di esecuzione simili alla versione precedente.
+	\item L'interfaccia a linea di comando per interagire con il simulatore deve essere autoesplicativa.
 \end{itemize}
 
 \section{Strumenti}
 
 \subsection{Gradle}
+
+Strumento open source di build automation configurabile attraverso due diversi \ac{dsl}: Groovy o Kotlin. Gradle utilizza un grafo aciclico diretto per determinare l'ordine di esecuzione dei processi. Supporta lo sviluppo incrementale essendo capace di riconoscere quali processi rieseguire a fronte di una modifica alla configurazione.
+Il procedimento di build si divide in tre fasi distinte.
+\paragraph{Fase di inizializzazione} In primo luogo Gradle crea un istanza di Settings che organizza l'architettura del progetto. Attraverso questo file, di nome "settings.gradle", lo sviluppatore stabilisce il progetto radice e tutti gli eventuali progetti figli. 
+\paragraph{Fase di configurazione} Successivamente tutti i file di configurazione build.gradle (del progetto radice e tutti i sotto-progetti) vengono analizzati per costruire il grafo dei task. Un task rappresenta un'unità atomica di esecuzione.
+\paragraph{Fase di esecuzione} Infine, Gradle esegue i task richiesti considerando le dipendenze descritte nel grafo generato dalla fase precedente.
 
 \subsection{Github actions}
 
