@@ -3,12 +3,11 @@
 
 \section{Requisiti}
 
-Il progetto si pone tre principali obiettivi:
+Il progetto si pone due principali obiettivi:
 \begin{itemize}
 	\setlength\itemsep{0.8em}
 	\item La generazione automatica di pacchetti di installazione multi-piattaforma \\ con \ac{jre} integrato
 	\item La pubblicazione automatica di rilasci all'interno dell'\ac{aur}
-	\item Lo sviluppo di una \ac{cli} per interagire con il simulatore
 \end{itemize}
 Con integrazione di un \ac{jre} si intende il supplemento di una \ac{jvm}, frequentemente ridotta di dimensioni, all'interno del pacchetto di installazione.
 L'utente potrebbe non aver alcun \ac{jre} installato sul proprio dispositivo, oppure quello presente potrebbe essere obsoleto. Inserendo una macchina virtuale Java: si fornisce uno specifico ambiente di esecuzione eliminando potenziali problemi di compatibilità e si agevola la procedura di installazione per l'end-user.
@@ -18,7 +17,6 @@ L'utente potrebbe non aver alcun \ac{jre} installato sul proprio dispositivo, op
 Le funzionalità richieste si possono classificare in due gruppi distinti: il primo contiene tutto ciò che concerne l'esperienza dell'utente finale, mentre il secondo descrive le funzionalità dal punto di vista degli sviluppatori e contributori di Alchemist. Di seguito il primo gruppo.
 \begin{itemize}
 	\item \textbf{Multi-piattaforma}: Alchemist deve essere installabile sui maggiori sistemi operativi in circolazione come Windows, MacOS e le principali distribuzioni Linux.
-	\item \textbf{Usabilità}: il simulatore deve fornire un'interfaccia \ac{cli} autoesplicativa e completa, ossia che permetta l'utilizzo di tutte le sue funzionalità.
 \end{itemize}
 
 I requisiti del gruppo successivo sono accumunabili per il loro scopo, vale a dire l'automazione.
@@ -44,11 +42,11 @@ I requisiti del gruppo successivo sono accumunabili per il loro scopo, vale a di
 
 Mentre in passato la produzione di artefatti (documentazione, pacchetti, eseguibili) era delegata a script costruiti dallo sviluppatore, in un progetto di grandi dimensioni è oggigiorno essenziale avvalersi di uno strumento di build automation. Come l'output di un programma deterministico non cambia per uno stesso input, la produzione di artefatti deve essere consistente e riproducibile riducendo al minimo l'intervento umano. 
 
-Gradle è uno dei tanti strumenti disponibili, supporta diversi linguaggi di programmazione anche se risulta popolare nell'ambiente JVM come alternativa a Maven. Gli script Gradle possono utilizzare due differenti \ac{dsl}: Groovy o Kotlin. I \textit{task} sono l'unità minima di esecuzione e rappresentano un azione: come generare un JAR, eseguire dei test o produrre la documentazione. Mediante direttive come \textit{dependsOn} è possibile creare dipendenze tra processi, Gradle per orchestrare l'esecuzione dei task costruisce un grafo aciclico diretto (DAG) delle dipendenze. L'esecuzione di Gradle avviene in tre fasi distinte elencate di seguito.
+Gradle è uno dei tanti strumenti disponibili, supporta diversi linguaggi di programmazione anche se risulta popolare nell'ambiente JVM come alternativa a Maven. (DSL?) Gli script Gradle possono utilizzare due differenti \ac{dsl}: Groovy o Kotlin. I \textit{task} sono l'unità minima di esecuzione e rappresentano un azione: come generare un JAR, eseguire dei test o produrre la documentazione. Mediante direttive come \textit{dependsOn} è possibile creare dipendenze tra processi, Gradle per orchestrare l'esecuzione dei task costruisce un grafo aciclico diretto (DAG) delle dipendenze. L'esecuzione di Gradle avviene in tre fasi distinte elencate di seguito.
 \begin{enumerate}
-	\item \textbf{Fase di inizializzazione}. In primo luogo Gradle crea un istanza di Settings che organizza l'architettura del progetto. Attraverso un file, di nome ``settings.gradle", lo sviluppatore stabilisce il progetto radice e tutti gli eventuali progetti figli. 
+	\item \textbf{Fase di inizializzazione}. In primo luogo Gradle crea un'istanza di Settings che organizza l'architettura del progetto. Attraverso un file, di nome ``settings.gradle", lo sviluppatore stabilisce il progetto radice e tutti gli eventuali progetti figli. 
 	\item \textbf{Fase di configurazione}. Successivamente tutti i file di configurazione ``build.gradle" (del progetto radice e tutti i sotto-progetti) vengono analizzati per costruire il grafo dei task.
-	\item \textbf{Fase di esecuzione}. Infine, Gradle esegue i task richiesti considerando le dipendenze descritte nel grafo generato dalla fase precedente.
+	\item \textbf{Fase di esecuzione}. Infine, Gradle esegue i task richiesti considerando le dipendenze descritte nel grafo generato nella fase precedente.
 \end{enumerate}
 
 \begin{figure}[H]
@@ -59,7 +57,7 @@ Gradle è uno dei tanti strumenti disponibili, supporta diversi linguaggi di pro
 \end{figure}
 Un componente chiave sono i plugin, i quali consentono di estendere le funzionalità di Gradle: aggiungere nuovi task, estendere il modello con nuovi elementi \ac{dsl} ed applicare configurazioni specifiche all'intero progetto. La presenza di diversi plugin base e creati dalla comunità rende Gradle uno strumento versatile.
 \paragraph{Analisi rispetto ai requisiti}
-In considerazione dei requisiti di automazione, Gradle fornisce le funzionalità per soddisfare i requisiti di pacchettizzazione, distribuzione e verifica del funzionamento. L'utilizzo di un \ac{dsl} come Kotlin consente l'accesso ad un infinità di moduli per interagire ad alto livello con il sistema sottostante. L'approccio task-based inoltre permette di suddividere un macro-processo in più unità di esecuzione riutilizzabili da altri processi, garantendo tutti i vantaggi che la filosofia \ac{dry} fornisce.
+In considerazione dei requisiti di automazione, Gradle fornisce le funzionalità per soddisfare i requisiti di pacchettizzazione, distribuzione e verifica del funzionamento. L'utilizzo di un \ac{dsl} come Kotlin consente l'accesso ad un'infinità di moduli per interagire ad alto livello con il sistema sottostante. L'approccio task-based inoltre permette di suddividere un macro-processo in più unità di esecuzione riutilizzabili da altri processi, garantendo tutti i vantaggi che la filosofia \ac{dry} fornisce.
 
 \newpage
 \subsection{GitHub Actions}
@@ -104,7 +102,3 @@ Nei sistemi operativi Linux il controllo dei componenti installati nella macchin
 
 \paragraph{Analisi rispetto ai requisiti}
 Nell'ottica di soddisfare il requisito multi-piattaforma del progetto è necessario analizzare le piattaforme di destinazione per il simulatore. Mentre per Windows e MacOS esistono specifiche tipologie di pacchetti di installazione supportati ufficialmente, per Linux non esiste uno standard univoco. Tuttavia  i pacchetti RPM e DEB sono supportati dalla maggior parte delle distribuzioni, in particolare il primo è citato nella specifica ``Linux Standard Base". Il PKGBUILD di Arch supporta nativamente l'estrazione di sorgenti RPM e DEB, pertanto a fronte di questa analisi essi risultano la scelta più opportuna.
-
-\subsection{Command Line Interface} 
-
-CLI
