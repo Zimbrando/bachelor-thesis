@@ -1,0 +1,18 @@
+\chapter{Design}
+
+\section{Architettura e macrostruttura}
+
+Alchemist, come esplicato nella sezione 1.4, è un progetto modulare complesso in continuo sviluppo. Gli strumenti presentati nel capitolo precedente trovano già impiego nel progetto, ad eccezione del software di impacchettamento il quale è oggetto di questo elaborato. Di seguito il confronto macro-strutturale riguarda l'utilizzo dell'infrastruttura GitHub Actions.
+\paragraph{Architettura iniziale} Alchemist utilizza fondamentalmente due workflow per soddisfare i requisiti di integrazione e rilascio continuo. Un primo workflow chiamato ``dispatcher", il quale funziona come punto di inizio del flusso, è in ascolto di diversi eventi e una volta avviato esamina (inspect) i meta-dati dell'evento scatenante per determinare lo step successivo. In particolare nella configurazione in oggetto questo step iniziale funge da filtro dal momento che esiste un solo possibile step successivo, ossia il secondo workflow quello adibito a soddisfare i compiti di build, test e distribuzione.
+
+\paragraph{}
+\section{Flusso di rilascio}
+Uno dei requisiti del metodo di sviluppo \ac{cicd} è 
+
+
+\section{User experience}
+Discussione design della terza parte
+
+\subsection{CLI e GUI}
+
+\subsection{Design CLI}

@@ -1,0 +1,21 @@
+name: workflow
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Build program
+        run: make
+
+  test:
+    needs: 
+      - build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Run tests
+        run: echo "Test"
