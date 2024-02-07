@@ -7,7 +7,7 @@ Alchemist, come esplicato nella sezione 1.4, è un progetto modulare complesso i
 \begin{itemize}
 	\item \textbf{Pipeline}: il flusso automatico gestito dall'infrastruttura di GitHub Actions. Questo componente è già presente e necessità quindi un aggiornamento per soddisfare i requisiti di questo elaborato.
 	\item \textbf{Build system}: l'insieme dei processi e delle funzioni adibite alla produzione di artefatti utilizzando il software Gradle. Questo componente richiede lo sviluppo di nuovi task per la produzione dei pacchetti di installazione.
-	\item \textbf{Release}: l'insieme dei requisiti per la pubblicazione nei repository pubblici come \ac{aur}. Questo componente sfrutterà i due componenti precedenti per costruire i pacchetti ed i metadati nel rispetto delle regole che il repository pubblico emana.
+	\item \textbf{Release}: l'insieme dei requisiti per la pubblicazione nei repository pubblici come \ac{aur}. Questo componente sfrutterà i due componenti precedenti per costruire i pacchetti ed i metadati nel rispetto delle regole vigenti nel repository pubblico.
 \end{itemize}
 
 \subsection{Pipeline}
@@ -39,25 +39,42 @@ Mentre per la generazione ed il rilascio esistono già dei job adibiti, è buona
 	\label{fig:activity-diagram-job}
 \end{figure}
 
-Il primo job \texttt{test-packages} utilizza la strategia a matrice per eseguire la procedura sui tre sistemi operativi target del progetto ed ha il compito di generare e controllare la validità dei pacchetti di installazione. Il secondo \texttt{test-aur-package} installa localmente il pacchetto all'interno di un container \textit{arch-linux} ed infine controlla il corretto esito dell'operazione costruendo il pacchetto con \textit{makepkg} ed installandolo con \textit{pacman}.
+Il primo job \texttt{test-packages} utilizza la strategia a matrice per eseguire la procedura sui tre sistemi operativi target del progetto ed ha il compito di generare e controllare la validità dei pacchetti di installazione. Il secondo \texttt{test-aur-package} installa localmente il pacchetto all'interno di un container \textit{arch-linux}, infine controlla il corretto esito dell'operazione costruendo il pacchetto con \textit{makepkg} ed installandolo con \textit{pacman}.
 
 \subsection{Build system}
 
-Il ruolo del \textit{build system} è quello di esporre un \textit{task} adibito alla generazione dei pacchetti utilizzando \textit{jpackage}. Come discusso nel capitolo precedente, \textit{jpackage} offre un'interfaccia \ac{cli} con diverse opzioni per configurare e personalizzare a piacimento i pacchetti in output. Esistono parametri generici, compatibili con tutte le piattaforme, e parametri specifici che vanno a modificare attributi particolari alla tipologia di pacchetto in output scelta.
+Il ruolo principale del \textit{build system} è quello di esporre un \textit{task} adibito alla generazione dei pacchetti. Il task dovrà soddisfare i seguenti requisiti:
+\begin{itemize}
+	\item Deve configurare correttamente le opzioni di \textit{jpackage}, in particolare quelle che mutano nel tempo come la versione.
+	\item È necessario stabilire un corretto ordine di esecuzione e albero delle dipendenze per garantire la consistenza del processo.
+	\item Deve prevedere la presenza di un task adibito al test del suo output (validità dei pacchetti).
+\end{itemize}
 
-\paragraph{jpackage} Uno dei motivi che ha portato alla scelta di \textit{jpackage} rispetto ad altri software è la capacità di includere autonomamente una \textit{runtime-image} di Java ossia una \ac{jre} ridotta di dimensioni all'interno del pacchetto. La combinazione di una \textit{runtime-image} e degli archivi Java (JAR) necessari all'esecuzione dell'applicazione costituiscono l'\textit{application-image}: un pacchetto autocontenuto che include l'applicazione, assieme una \ac{jvm} ed alle librerie necessarie per eseguire quell'applicazione sulla piattaforma di destinazione. La generazione della \textit{runtime-image}, se non inclusa manualmente, è delegata ad uno strumento del jdk di nome \textit{jlink}.
+\paragraph{JPackage} Lo strumento \ac{cli} \textit{jpackage} offre un'interfaccia munita di diverse opzioni per configurare e personalizzare a piacimento i pacchetti in output. Esistono parametri generici, compatibili con tutte le piattaforme, e parametri specifici che vanno a modificare attributi particolari alla tipologia di pacchetto in output scelta. Uno dei motivi che ha portato alla scelta di \textit{jpackage} rispetto ad altri software è la capacità di includere autonomamente una \textit{runtime-image} di Java, ossia una \ac{jre} ridotta di dimensioni all'interno del pacchetto. La combinazione di una \textit{runtime-image} e degli archivi Java (JAR) necessari all'esecuzione dell'applicazione costituiscono l'\textit{application-image}: un pacchetto autocontenuto che include l'applicazione, assieme una \ac{jvm} ed alle librerie necessarie per eseguire quell'applicazione sulla piattaforma di destinazione. La generazione della \textit{runtime-image}, se non inclusa manualmente, è delegata ad uno strumento del \ac{jdk} di nome \textit{jlink}. 
 
-Alchemist, come specificato nella documentazione\footnote{https://alchemistsimulator.github.io/howtos/preparation/jar/index.html}, può essere avviato in modalità stand-alone utilizzando l'archivio denominato ``full". L'\textit{application-image} finale è formato come descritto nella figura 3.3.
-
+Alchemist, come specificato nella documentazione\footnote{https://alchemistsimulator.github.io/howtos/preparation/jar/index.html}, può essere avviato in modalità stand-alone utilizzando l'archivio denominato ``full". L'\textit{application-image} è formato come descritto nella figura 3.3. La posizione ed organizzazione dei file è diversa a seconda della piattaforma di destinazione del pacchetto. 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=.7\linewidth]{figures/application-image-folder-structure.pdf}
-	\caption{Struttura del filesystem dell'\textit{application image} generato da \textit{jpackage}}
-	\label{fig:activity-diagram-job}
+	\caption{Struttura del filesystem dell'\textit{application image} generato da \textit{jpackage} con Linux come piattaforma target}
+	\label{fig:application-image-folder-structure}
 \end{figure}
 
-\paragraph{Plugin Gradle}
+\paragraph{Plugin} Per introdurre jpackage nel build system è necessario un task che funga da \textit{wrapper}: il quale esponga proprietà corrispondenti alle opzioni della \ac{cli} di jpackage e autonomamente invochi il comando. Il plugin \texttt{jpackage-gradle-plugin}\footnote{https://github.com/petr-panteleyev/jpackage-gradle-plugin} risponde a queste necessità fornendo il tipo: \texttt{JPackageTask}. 
+
+
+\paragraph{Design} Il design finale è rappresentato dal diagramma delle attività in figura 3.4.
 
 
 \subsection{Release}
-Citare wiki, citare le regole, capire come ovviare alle regole
+Il terzo componente riguarda la procedura di rilascio e distribuzione nei repository pubblici. Innanzitutto, è necessario conoscere la tecnica utilizzata per gestire i rilasci automatici: il \textit{semantic versioning}.
+
+\paragraph{Release automatiche}
+
+\paragraph{AUR}
+
+\paragraph{WinGet}
+
+\paragraph{Snapcraft e Flathub}
+
+\paragraph{Conclusioni e punti comuni}

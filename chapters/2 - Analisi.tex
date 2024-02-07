@@ -62,7 +62,7 @@ In considerazione dei requisiti di automazione, Gradle fornisce le funzionalità
 \newpage
 \subsection{GitHub Actions}
 
-Tramite Gradle lo sviluppatore è in grado di eseguire procedure articolate come compilazione, test e dispiegamento utilizzando un semplice comando da \ac{cli}. \\ L'esecuzione di queste procedure richiede però l'intervento umano e non è sufficiente per garantire un flusso di integrazione e rilascio continuo. 
+Tramite Gradle lo sviluppatore è in grado di eseguire procedure articolate come compilazione, test e dispiegamento utilizzando un semplice comando da \ac{cli}. L'esecuzione di queste procedure richiede però l'intervento umano e non è sufficiente per garantire un flusso di integrazione e rilascio continuo. 
 
 GitHub Actions è una piattaforma di \ac{cicd} disponibile per i repository ospitati su GitHub. Consente la configurazione ed esecuzione di pipeline personalizzate, i \textit{workflow}. Un workflow consiste in un insieme di \textit{job} eseguiti sequenzialmente o parallelamente all'interno di una macchina virtuale detta \textit{runner}. La piattaforma fornisce macchine virtuali per ogni sistema operativo (Windows, MacOS e Linux) con la possibilità di utilizzare container docker. GitHub in primo luogo è una piattaforma di code-sharing orientata allo sviluppo open source, una peculiarità della funzionalità Actions è la vasta gamma di eventi configurabili per avviare un workflow: dall'apertura di una pull-request, un commento o la creazione di un fork.
 
@@ -81,7 +81,7 @@ Uno step può presentare una lista di comandi eseguiti nella shell di riferiment
 
 La piattaforma di GitHub Actions ricopre un ruolo fondamentale nell'ambito dell'automazione: offre l'infrastruttura per l'esecuzione delle pipeline.
 
-\subsection{Arch User Repository}
+\subsection{Package manager}
 
 Nei sistemi operativi Linux il controllo dei componenti installati nella macchina è completamente delegato ai \textit{package manager}. Il \textit{package-management system} è un insieme di strumenti software che gestiscono i processi di installazione, aggiornamento, configurazione e rimozione di applicativi dal sistema. Spesso un pacchetto corrisponde ad un particolare programma o applicazione. Allo stesso tempo però esistono applicativi più complessi composti da più pacchetti correlati. Il sistema di gestione dei pacchetti opera attraverso tre componenti principali.
 
@@ -98,7 +98,11 @@ Nei sistemi operativi Linux il controllo dei componenti installati nella macchin
 	\label{fig:package-managers}
 \end{figure}
 
-\paragraph{Arch Linux} Una distribuzione importante nel vasto panorama dei fork Linux è Arch. Arch è una distribuzione Linux con architettura x86-64 creata seguendo la filosofia \ac{kiss}. È infatti rinomata per essere leggera, veloce, estremamente scalabile ed adattabile alle proprie esigenze. Data la sua natura minimalista, l'installazione iniziale non incorpora alcun strumento di configurazione automatica, nessun ambiente desktop e nessun altro strumento necessario all'avvio del sistema. Il sistema di gestione dei pacchetti si chiama \textit{pacman} ed a differenza dei concorrenti, opera sia a basso che ad alto livello. Un pacchetto non è altro che un file shell script denominato \textit{PKGBUILD} contenente le istruzioni necessarie a scaricare i sorgenti e compilarli attraverso un comando: \textit{makepkg}. La linearità dei file PKGBUILD rende la creazione di pacchetti alla portata di qualsiasi utente. \textbf{\ac{aur}} è una peculiarità di Arch che la distingue dalle altre distribuzioni. Si tratta di un repository di pacchetti in cui qualsiasi utente, anche non sviluppatore, può contribuire. 
+\paragraph{Arch User Repository} Una distribuzione importante nel vasto panorama dei fork Linux è Arch. Arch è una distribuzione Linux con architettura x86-64 creata seguendo la filosofia \ac{kiss}. È infatti rinomata per essere leggera, veloce, estremamente scalabile ed adattabile alle proprie esigenze. Data la sua natura minimalista, l'installazione iniziale non incorpora alcun strumento di configurazione automatica, nessun ambiente desktop e nessun altro strumento necessario all'avvio del sistema. Il sistema di gestione dei pacchetti si chiama \textit{pacman} ed a differenza dei concorrenti, opera sia a basso che ad alto livello. Un pacchetto non è altro che un file shell script denominato \textit{PKGBUILD} contenente le istruzioni necessarie a scaricare i sorgenti e compilarli attraverso un comando: \textit{makepkg}. La linearità dei file PKGBUILD rende la creazione di pacchetti alla portata di qualsiasi utente. \textbf{\ac{aur}} è una peculiarità di Arch che la distingue dalle altre distribuzioni. Si tratta di un repository di pacchetti in cui qualsiasi utente, anche non sviluppatore, può contribuire. 
+
+\paragraph{Winget}
+
+\paragraph{Snapcraft e Flathub}
 
 \paragraph{Analisi rispetto ai requisiti}
 Nell'ottica di soddisfare il requisito multi-piattaforma del progetto è necessario analizzare le piattaforme di destinazione per il simulatore. Mentre per Windows e MacOS esistono specifiche tipologie di pacchetti di installazione supportati ufficialmente, per Linux non esiste uno standard univoco. Tuttavia  i pacchetti RPM e DEB sono supportati dalla maggior parte delle distribuzioni, in particolare il primo è citato nella specifica ``Linux Standard Base". Il PKGBUILD di Arch supporta nativamente l'estrazione di sorgenti RPM e DEB, pertanto a fronte di questa analisi essi risultano la scelta più opportuna.
