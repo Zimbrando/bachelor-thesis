@@ -1,17 +1,50 @@
 %!TEX root = ../thesis-main.tex
+
+% Percorso implementativo:
+% 	- jpackage e le opzioni in dettaglio
+%  	- jlink e jdeps
+%   - il plugin gradle per operare con jpackage
+%   - la necessità di estendere con jpackageFull
+%   - inserimento dei test e della release dei pacchetti
+%   - le operazioni per la distribuzione e il test di queste (AUR)
+
 \chapter{Implementazione}
 
-\section{Pipeline}
+Nel seguente capitolo è illustrato il percorso e le relative scelte implementative effettuate per soddisfare i requisiti posti dal progetto. Successivamente, valuterò il lavoro svolto considerando i requisiti non funzionali posti.
 
-Un primo workflow chiamato ``dispatcher", il quale funziona come punto di inizio del flusso, è in ascolto di eventi e una volta avviato esamina i meta-dati dell'evento scatenante per determinare il flusso successivo. In particolare nella configurazione in oggetto questo step iniziale funge da filtro dal momento che esiste un solo possibile flusso successivo, ossia il secondo workflow quello adibito a soddisfare i compiti di build, test e distribuzione.
-Per compiere le tre funzioni il workflow è formato dai seguenti job.
-\begin{itemize}
-	\item \textbf{select-java-version}: è il punto di inizio ed ha il compito di propagare la versione minima supportata per replicare lo stesso ambiente \ac{jre} nei successivi job.
-	\item \textbf{build}: esegue un'analisi statica del codice e gli unit test. Utilizza una strategia a matrice per costruire più istanze in ambienti diversi: in questo caso nei tre sistemi operativi principali. 
-	\item \textbf{test-deploy}: esegue un test del deploy dei moduli di Alchemist. Il test è strettamente necessario per l'esecuzione corretta di un rilascio.
-	\item \textbf{build-website}: costruisce il sito web di documentazione e lo prepara per il rilascio.
-	\item \textbf{release}: analizza attraverso tecniche di semantic-versioning se è necessario il rilascio di una nuova versione del software. In caso positivo: costruisce i JAR, ottiene il sito e pubblica una nuova versione.
-	\item \textbf{success}: infine, controlla che l'output di ogni job sia esente da errori.
-\end{itemize}
+\section{Impacchettamento}
 
-\section{Gestione del rilascio}
+Come discusso nelle precedenti sezioni riguardanti lo strumento jpackage (in particolare sezione \ref{sec:design-jpackage}), esso presenta una notevole quantità di opzioni sia inerenti l'aspetto estetico, sia riguardo aspetti tecnici che possono contraddistinguere la qualità finale del pacchetto di installazione.
+\begin{table}[]
+	\centering
+	\begin{tabular}{lcc}
+		\rowcolor[HTML]{ECF4FF} 
+		{\ul Opzione} & {\ul Funzionalità} & {\ul Eventuali parametri} \\
+	    - -type & Permette di indicare le funzionalità richieste &  \\
+		- -temp &  &  \\
+		- -input	& & \\	      
+		- -main-jar & & \\
+		- -main-class & & \\
+		- -add-modules & & \\                          
+		- -jlink-options & & \\
+		- -runtime-image & & \\
+	\end{tabular}
+	\caption{Tabella che elenca le principali opzioni tecniche del comando \texttt{jpackage}}
+\end{table}
+
+\paragraph{Ottimizzazione} Per comprendere le scelte implementative riguardo opzioni tecniche è necessario introdurre altri due strumenti del \ac{jdk}: (i) \texttt{jlink}, strumento delegato alla produzione della \textit{runtime-image} inserita all'interno del pacchetto e (ii) \texttt{jdeps}, comando utilizzabile per analizzare le dipendenze di un archivio JAR. I due strumenti assieme forniscono la capacità di ottimizzare lo spazio, generando runtime-image di dimensioni ridotte comprendendo all'interno della JVM solamente i moduli necessari all'esecuzione dell'applicazione. Per sfruttare questo potenziale è richiesto l'utilizzo dei tre strumenti a catena come esposto di seguito:
+\begin{enumerate}
+	\item jdeps, analizza l'archivio contenente la nostra applicazione e restituisce i moduli jvm necessari per il corretto funzionamento dell'applicazione. Il comando viene lanciato con i seguenti parametri
+	\item jlink, utilizza i moduli evidenziati da jdeps per creare una runtime-image personalizzata di dimensioni ridotte
+	\item jpackage, utilizza la runtime-image creata precedentemente assieme all'archivio dell'applicazione per generare il pacchetto: l'application-image.
+\end{enumerate}
+
+\subsection{JPackage}
+
+\subsection{Automazione}
+
+\section{Distribuzione}
+
+\section{Valutazione}
+
+- Cosa cambiare, ottimizzazioni
