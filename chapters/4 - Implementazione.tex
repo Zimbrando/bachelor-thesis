@@ -1,7 +1,17 @@
 %!TEX root = ../thesis-main.tex
 \chapter{Implementazione}
 
+\section{Pipeline}
+
+Un primo workflow chiamato ``dispatcher", il quale funziona come punto di inizio del flusso, è in ascolto di eventi e una volta avviato esamina i meta-dati dell'evento scatenante per determinare il flusso successivo. In particolare nella configurazione in oggetto questo step iniziale funge da filtro dal momento che esiste un solo possibile flusso successivo, ossia il secondo workflow quello adibito a soddisfare i compiti di build, test e distribuzione.
+Per compiere le tre funzioni il workflow è formato dai seguenti job.
 \begin{itemize}
-	\item Particolari design nell'interfaccia CLI
-	\item Esempi
+	\item \textbf{select-java-version}: è il punto di inizio ed ha il compito di propagare la versione minima supportata per replicare lo stesso ambiente \ac{jre} nei successivi job.
+	\item \textbf{build}: esegue un'analisi statica del codice e gli unit test. Utilizza una strategia a matrice per costruire più istanze in ambienti diversi: in questo caso nei tre sistemi operativi principali. 
+	\item \textbf{test-deploy}: esegue un test del deploy dei moduli di Alchemist. Il test è strettamente necessario per l'esecuzione corretta di un rilascio.
+	\item \textbf{build-website}: costruisce il sito web di documentazione e lo prepara per il rilascio.
+	\item \textbf{release}: analizza attraverso tecniche di semantic-versioning se è necessario il rilascio di una nuova versione del software. In caso positivo: costruisce i JAR, ottiene il sito e pubblica una nuova versione.
+	\item \textbf{success}: infine, controlla che l'output di ogni job sia esente da errori.
 \end{itemize}
+
+\section{Gestione del rilascio}
