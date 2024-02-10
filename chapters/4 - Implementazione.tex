@@ -12,38 +12,87 @@
 
 Nel seguente capitolo è illustrato il percorso e le relative scelte implementative effettuate per soddisfare i requisiti posti dal progetto. Successivamente, valuterò il lavoro svolto considerando i requisiti non funzionali posti.
 
-\section{Impacchettamento}
+\section{Impacchettamento e distribuzione}
 
-Come discusso nelle precedenti sezioni riguardanti lo strumento jpackage (in particolare sezione \ref{sec:design-jpackage}), esso presenta una notevole quantità di opzioni sia inerenti l'aspetto estetico, sia riguardo aspetti tecnici che possono contraddistinguere la qualità finale del pacchetto di installazione.
-\begin{table}[]
-	\centering
-	\begin{tabular}{lcc}
+\subsection{Impacchettamento}
+Come discusso nelle precedenti sezioni riguardanti lo strumento jpackage (in particolare sezione \ref{sec:design-jpackage}), esso presenta una notevole quantità di opzioni sia inerenti l'aspetto estetico (come nome dell'applicazione, icona, copyright ed altri), sia riguardo aspetti tecnici che possono contraddistinguere la qualità del pacchetto di installazione.
+\def\arraystretch{1.5}%  1 is the default, change whatever you need
+\begin{table}[htb]\label{tab:jpackage-options}
+	\begin{tabular}{|l|l|l|}
+		\hline
 		\rowcolor[HTML]{ECF4FF} 
-		{\ul Opzione} & {\ul Funzionalità} & {\ul Eventuali parametri} \\
-	    - -type & Permette di indicare le funzionalità richieste &  \\
-		- -temp &  &  \\
-		- -input	& & \\	      
-		- -main-jar & & \\
-		- -main-class & & \\
-		- -add-modules & & \\                          
-		- -jlink-options & & \\
-		- -runtime-image & & \\
+		\multicolumn{1}{|c|}{\cellcolor[HTML]{ECF4FF}{\ul Opzione}} &
+		\multicolumn{1}{c|}{\cellcolor[HTML]{ECF4FF}{\ul Funzionalità}} &
+		\multicolumn{1}{c|}{\cellcolor[HTML]{ECF4FF}{\ul Eventuali parametri}} \\ \hline
+		\texttt{--type} &
+		Tipologia di pacchetto in output &
+		\begin{tabular}[c]{@{}l@{}}rpm, deb, exe, msi, \\ pkg, dmg\end{tabular} \\ \hline
+		\texttt{--input} &
+		\begin{tabular}[c]{@{}l@{}}Directory contenente i file\\ da impacchettare\end{tabular} &
+		Percorso alla directory \\ \hline
+		\texttt{--main-jar} &
+		\begin{tabular}[c]{@{}l@{}}L'archivio JAR principale\\ contenete la classe principale\end{tabular} &
+		Percorso del JAR \\ \hline
+		\texttt{--main-class} &
+		\begin{tabular}[c]{@{}l@{}}La classe che contiene la \\ funzione di avvio\end{tabular} &
+		Nome della classe \\ \hline
+		\texttt{--add-modules} &
+		\begin{tabular}[c]{@{}l@{}}I moduli integrati nel\\ runtime-image generato da \\ jlink\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Lista dei moduli separata\\ da ','\end{tabular} \\ \hline
+		\texttt{--jlink-options} &
+		\begin{tabular}[c]{@{}l@{}}Ulteriori opzioni per\\ l'esecuzione di jlink\end{tabular} &
+		Lista delle opzioni \\ \hline
 	\end{tabular}
 	\caption{Tabella che elenca le principali opzioni tecniche del comando \texttt{jpackage}}
 \end{table}
 
-\paragraph{Ottimizzazione} Per comprendere le scelte implementative riguardo opzioni tecniche è necessario introdurre altri due strumenti del \ac{jdk}: (i) \texttt{jlink}, strumento delegato alla produzione della \textit{runtime-image} inserita all'interno del pacchetto e (ii) \texttt{jdeps}, comando utilizzabile per analizzare le dipendenze di un archivio JAR. I due strumenti assieme forniscono la capacità di ottimizzare lo spazio, generando runtime-image di dimensioni ridotte comprendendo all'interno della JVM solamente i moduli necessari all'esecuzione dell'applicazione. Per sfruttare questo potenziale è richiesto l'utilizzo dei tre strumenti a catena come esposto di seguito:
+\paragraph{Ottimizzazione} Per comprendere le scelte implementative riguardo le opzioni di carattere tecnico è necessario introdurre altri due strumenti del \ac{jdk}: (i) \texttt{jlink}, strumento delegato alla produzione della \textit{runtime-image} inserita all'interno del pacchetto e (ii) \texttt{jdeps}, comando utilizzabile per analizzare le dipendenze di un archivio JAR. Il primo ha la peculiarità di consentire la creazione di immagini personalizzate contenente solo i componenti necessari per eseguire un'applicazione specifica, riducendo così le dimensioni complessive e incrementando le prestazioni dell'applicazione. Per ottenere i componenti necessari si utilizza il secondo, jdeps, applicato all'archivio JAR contenente l'intera applicazione. In sintesi la generazione del pacchetto richiede l'utilizzo dei tre strumenti a catena come esposto di seguito:
 \begin{enumerate}
-	\item jdeps, analizza l'archivio contenente la nostra applicazione e restituisce i moduli jvm necessari per il corretto funzionamento dell'applicazione. Il comando viene lanciato con i seguenti parametri
-	\item jlink, utilizza i moduli evidenziati da jdeps per creare una runtime-image personalizzata di dimensioni ridotte
-	\item jpackage, utilizza la runtime-image creata precedentemente assieme all'archivio dell'applicazione per generare il pacchetto: l'application-image.
+	\item \texttt{jdeps}, analizza l'archivio contenente la nostra applicazione e restituisce i moduli jvm necessari per il corretto funzionamento di essa.
+	\item \texttt{jlink}, utilizza i moduli evidenziati da jdeps per creare una runtime-image personalizzata di dimensioni ridotte
+	\item \texttt{jpackage}, utilizza la runtime-image creata precedentemente assieme all'archivio dell'applicazione per generare il pacchetto: l'application-image.
 \end{enumerate}
 
-\subsection{JPackage}
+\lstinputlisting[float,language=Bash,label={lst:jlink-runtime-image-creation}, caption={Comandi eseguiti per creare un java-runtime di dimensioni ridotte}]{listings/jpackage-jlink.sh}
 
-\subsection{Automazione}
+I comandi utilizzati nel processo sono indicati nel listato \ref{lst:jlink-runtime-image-creation}. In particolare l'esecuzione di jdeps coinvolge le seguenti opzioni:
+\begin{itemize}
+	\item \texttt{--print-module-deps} indica di restituire un output conforme all'input richiesto da jlink (modulo, modulo, ...),
+	\item \texttt{--add-modules} aggiunge attraverso la costante ALL-MODULE-PATH tutti i moduli per eseguire l'analisi,
+	\item \texttt{--ignore-missing-deps} non restituisce le dipendenze mancanti nell'output,
+	\item \texttt{--no-recursive} 
+\end{itemize}
 
-\section{Distribuzione}
+jpackage fornisce due opzioni per modificare il comportamento nascosto all'utente di jlink: \texttt{--jlink-options} e \texttt{--add-modules}. Il comando risultante (non comprendente le opzioni estetiche) utilizzando le opzioni descritte nella tabella \ref{tab:jpackage-options} è il seguente:
+
+\texttt{\\ jpackage --input build/package-input \\ \tab\tab --main-jar alchemist-full-VERSION.jar \\ \tab\tab --main-class it.unibo.alchemist.Alchemist \\ \tab\tab --type \{rpm, deb\} \\ \tab\tab --add-modules \\ \tab\tab --jlink-options \\}
+
+%------------------------------------------------
+
+Il design elaborato nel capitolo precedente evidenziava la necessità di un task \textit{wrapper} che incapsulasse le opzioni e funzionalità di jpackage. La versatilità offerta da Gradle ha permesso di ottenere il risultato voluto attraverso \textit{jpackage-gradle-plugin}\footnote{https://github.com/petr-panteleyev/jpackage-gradle-plugin}: un plugin sviluppato dalla comunità. Questo componente introduce un tipo di task \texttt{JPackageTask} capace di: (i) configurare tutte le opzioni supportate da jpackage per qualsiasi versione del \ac{jdk}, (ii) definire blocchi eseguiti solamente su un sistema operativo specifico e (iii) testare le configurazioni attraverso la modalità \textit{dry run}. Il plugin introdotto però, non compensa uno dei limiti di jpackage esposto durante l'analisi dello strumento, ossia la necessità di eseguire il programma molteplici volte per ottenere tutte le tipologie di pacchetti. Per far fronte a questa restrizione, ho creato una tipologia personalizzata estendendo quella fornita dal plugin per modificare il suo comportamento in esecuzione, nello specifico il metodo contrassegnato come \texttt{@TaskAction}.
+
+\lstinputlisting[float,language=Kotlin,label={lst:custom-jpackage-task}, caption={Definizione di un tipo personalizzato per compensare il limite di jpackage}]{listings/custom-jpackage-task.kt}
+
+\paragraph{Risultato}
+
+%Confronto, scelta tra i due full o solo moduli, il guadagno in %, perché in alchemist è così poco ed in altre applicazioni potrebbe essere molto maggiore
+
+\subsection{Distribuzione}
+
+Una volta impacchettato l'applicativo, quest'ultimo è pronto per essere installato e utilizzato dall'utente finale. In un contesto \ac{cicd} è fondamentale eseguire rilasci diffusi del software, che essi siano aggiornamenti sostanziosi oppure \textit{patch} risolutive di errori o vulnerabilità. Nei paragrafi seguenti saranno esposte le tecniche utilizzate per garantire rilasci consistenti e gli specifici requisiti che i repository coinvolti possiedono.
+
+\paragraph{Templating}
+
+
+
+\paragraph{Script}
+
+\section{Automazione}
+Lo sezione precedente ha illustrato la generazione dei pacchetti, la preparazione necessaria alla distribuzione di essi e l'integrazione di questi processi all'interno del build system. Quest'ultimo serve da collegamento per soddisfare il requisito chiave dell'elaborato, l'automazione. 
+
+\subsection{Test}
+
+\subsection{Release}
 
 \section{Valutazione}
 
