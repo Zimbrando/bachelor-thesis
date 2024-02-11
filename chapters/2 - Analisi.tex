@@ -7,23 +7,24 @@ Il progetto si pone due principali obiettivi:
 \begin{itemize}
 	\setlength\itemsep{0.8em}
 	\item La generazione automatica di pacchetti di installazione multi-piattaforma \\ con \ac{jre} integrato
-	\item La pubblicazione automatica di rilasci all'interno dell'\ac{aur}
+	\item La pubblicazione automatica dei rilasci del software all'interno di repository pubblici selezionati
 \end{itemize}
-Con integrazione di un \ac{jre} si intende il supplemento di una \ac{jvm}, frequentemente ridotta di dimensioni, all'interno del pacchetto di installazione.
-L'utente potrebbe non aver alcun \ac{jre} installato sul proprio dispositivo, oppure quello presente potrebbe essere obsoleto. Inserendo una macchina virtuale Java: si fornisce uno specifico ambiente di esecuzione eliminando potenziali problemi di compatibilità e si agevola la procedura di installazione per l'end-user.
+Con integrazione di un \ac{jre} si intende il supplemento di una \ac{jvm} all'interno del pacchetto di installazione.
+L'utente potrebbe non aver alcun \ac{jre} installato sul proprio dispositivo, oppure quello presente potrebbe essere obsoleto. Inserendo una macchina virtuale Java: si fornisce uno specifico ambiente di esecuzione eliminando potenziali problemi di compatibilità e si agevola la procedura di installazione per l'utente finale.
 
 \paragraph{Requisiti funzionali}
 
-Le funzionalità richieste si possono classificare in due gruppi distinti: il primo contiene tutto ciò che concerne l'esperienza dell'utente finale, mentre il secondo descrive le funzionalità dal punto di vista degli sviluppatori e contributori di Alchemist. Di seguito il primo gruppo.
+Le funzionalità richieste si possono classificare in due gruppi distinti: il primo contiene tutto ciò che concerne l'esperienza dell'utente finale, mentre il secondo descrive le funzionalità dal punto di vista degli sviluppatori e contributori di Alchemist. Di seguito il primo gruppo:
 \begin{itemize}
 	\item \textbf{Multi-piattaforma}: Alchemist deve essere installabile sui maggiori sistemi operativi in circolazione come Windows, MacOS e le principali distribuzioni Linux.
+	\item \textbf{Pronto all'uso}: l'installazione non deve richiedere configurazioni complesse, l'applicativo deve essere pronto all'uso non appena installato.
 \end{itemize}
 
 I requisiti del gruppo successivo sono accumunabili per il loro scopo, vale a dire l'automazione.
 
 \begin{itemize}
 	\item \textbf{Automazione dei pacchetti}: la generazione dei pacchetti di installazione deve essere automatica e configurabile
-	\item \textbf{Automazione della distribuzione}: il rilascio di una nuova versione deve essere eseguita autonomamente fornendo i pacchetti come assets di GitHub e pubblicare l'aggiornamento nell'\ac{aur}.
+	\item \textbf{Automazione della distribuzione}: il rilascio di una nuova versione deve essere eseguito interamente automaticamente, compreso la distribuzione di esso nei repository selezionati.
 	\item \textbf{Verifica funzionamento}: entrambi i processi descritti precedentemente devono essere corredati da verifiche del loro funzionamento e devono bloccare la procedura di rilascio nell'eventualità siano presenti errori.
 \end{itemize}
 
@@ -34,7 +35,21 @@ I requisiti del gruppo successivo sono accumunabili per il loro scopo, vale a di
 	\item Il tempo di esecuzione della pipeline non deve incrementare.
 \end{itemize}
 
-\section{Impacchettamento}\label{ssec:packaging}
+\section{Impacchettamento}\label{sec:packaging}
+
+Come si evince dall'analisi svolta, l'impacchettamento è requisito fondamentale dell'elaborato. Sino ad ora l'applicativo Alchemist era distribuito in file JAR, ossia archivi java compressi contenenti tutte le dipendenze ed i relativi \textit{classfiles} necessari all'esecuzione. Quest'approccio molto diffuso porta con sè diverse limitazioni tra cui:
+\begin{itemize}
+	\item la necessità dell'utente scaricante di avere un \ac{jre} installato nel proprio dispositivo,
+	\item il potenziale bisogno di utilizzare un ambiente \ac{jre} specifico e quindi per l'utente di non possedere una versione dell'ambiente compatibile,
+	\item la difficoltà di utilizzo per utenti non esperti, i quali sono abituati ad eseguire programmi utilizzando file eseguibili nativi della propria piattaforma.
+\end{itemize}
+
+Seppur alcune di queste restrizioni sono in parte mitigate in certe piattaforme, non è lo stesso per altre molto diffuse come Windows, il quale per esempio non fornisce un ambiente java pre-installato. Esistono diversi strumenti di terze parti e non che cercano di far fronte a questo problema, è importante dunque valutare e scegliere lo strumento più opportuno.
+
+\subsection{Soluzioni}
+
+Nell'ottica di semplificare la configurazione di questo processo lo strumento selezionato: (i) deve supportare le tre principali piattaforme descritte nei requisiti precedentemente e (ii) deve fornire . Tra gli strumenti analizzati due molto differenti si sono distinti, vale a dire: \textit{jpackage}, comando disponibile nel \ac{jdk} dalla versione 14 adibito alla produzione di pacchetti auto-contenuti con \ac{jre} integrata e \textit{GraalVM}, un \ac{jdk} sviluppato da Oracle che fornisce un compilatore \ac{jit} e \ac{aot} per java. 
+\paragraph{Valutazione finale}
 
 \section{Strumenti}
 
@@ -42,24 +57,24 @@ I requisiti del gruppo successivo sono accumunabili per il loro scopo, vale a di
 
 Mentre in passato la produzione di artefatti (documentazione, pacchetti, eseguibili) era delegata a script costruiti dallo sviluppatore, in un progetto di grandi dimensioni è oggigiorno essenziale avvalersi di uno strumento di build automation. Come l'output di un programma deterministico non cambia per uno stesso input, la produzione di artefatti deve essere consistente e riproducibile riducendo al minimo l'intervento umano. 
 
-Gradle è uno dei tanti strumenti disponibili, supporta diversi linguaggi di programmazione anche se risulta popolare nell'ambiente JVM come alternativa a Maven. (DSL?) Gli script Gradle possono utilizzare due differenti \ac{dsl}: Groovy o Kotlin. I \textit{task} sono l'unità minima di esecuzione e rappresentano un azione: come generare un JAR, eseguire dei test o produrre la documentazione. Mediante direttive come \textit{dependsOn} è possibile creare dipendenze tra processi, Gradle per orchestrare l'esecuzione dei task costruisce un grafo aciclico diretto (DAG) delle dipendenze. L'esecuzione di Gradle avviene in tre fasi distinte elencate di seguito.
+Gradle è uno dei tanti strumenti disponibili, supporta diversi linguaggi di programmazione anche se risulta popolare nell'ambiente JVM come alternativa a Maven. I \textit{task} sono l'unità minima di esecuzione e rappresentano un azione: come generare un JAR, eseguire dei test o produrre la documentazione. Mediante direttive come \textit{dependsOn} è possibile creare dipendenze tra processi, Gradle per orchestrare l'esecuzione dei task costruisce un grafo aciclico diretto (DAG) delle dipendenze. L'esecuzione di Gradle avviene in tre fasi distinte elencate di seguito.
 \begin{enumerate}
 	\item \textbf{Fase di inizializzazione}. In primo luogo Gradle crea un'istanza di Settings che organizza l'architettura del progetto. Attraverso un file, di nome ``settings.gradle", lo sviluppatore stabilisce il progetto radice e tutti gli eventuali progetti figli. 
 	\item \textbf{Fase di configurazione}. Successivamente tutti i file di configurazione ``build.gradle" (del progetto radice e tutti i sotto-progetti) vengono analizzati per costruire il grafo dei task.
 	\item \textbf{Fase di esecuzione}. Infine, Gradle esegue i task richiesti considerando le dipendenze descritte nel grafo generato nella fase precedente.
 \end{enumerate}
 
-\begin{figure}[H]
+\begin{figure}[htb]
 	\centering
-	\includegraphics[width=.8\linewidth]{figures/gradle-build-lifecycle-example.png}
+	\includegraphics[width=.9\linewidth]{figures/gradle-build-lifecycle-example.png}
 	\caption{Esempio di inizializzazione, configurazione ed esecuzione di una build Gradle}
 	\label{fig:gradle-build-lifecycle}
 \end{figure}
-Un componente chiave sono i plugin, i quali consentono di estendere le funzionalità di Gradle: aggiungere nuovi task, estendere il modello con nuovi elementi \ac{dsl} ed applicare configurazioni specifiche all'intero progetto. La presenza di diversi plugin base e creati dalla comunità rende Gradle uno strumento versatile.
-\paragraph{Analisi rispetto ai requisiti}
-In considerazione dei requisiti di automazione, Gradle fornisce le funzionalità per soddisfare i requisiti di pacchettizzazione, distribuzione e verifica del funzionamento. L'utilizzo di un \ac{dsl} come Kotlin consente l'accesso ad un'infinità di moduli per interagire ad alto livello con il sistema sottostante. L'approccio task-based inoltre permette di suddividere un macro-processo in più unità di esecuzione riutilizzabili da altri processi, garantendo tutti i vantaggi che la filosofia \ac{dry} fornisce.
+Un componente chiave sono i plugin, i quali consentono di estendere le funzionalità di Gradle: aggiungere nuovi task, estendere il modello con nuovi elementi ed applicare configurazioni specifiche all'intero progetto. La presenza di diversi plugin base e creati dalla comunità rende Gradle uno strumento versatile.
 
-\newpage
+\paragraph{Analisi rispetto ai requisiti}
+In considerazione dei requisiti di automazione, Gradle fornisce le funzionalità per soddisfare i requisiti di pacchettizzazione, distribuzione e verifica del funzionamento. L'utilizzo di un \ac{dsl} come Kotlin consente l'accesso ad un'infinità di moduli per interagire ad alto livello con il sistema sottostante. L'approccio orientato ai task inoltre permette di suddividere un macro-processo in più unità di esecuzione riutilizzabili da altri processi, garantendo tutti i vantaggi che la filosofia \ac{dry} fornisce.
+
 \subsection{GitHub Actions}
 
 Tramite Gradle lo sviluppatore è in grado di eseguire procedure articolate come compilazione, test e dispiegamento utilizzando un semplice comando da \ac{cli}. L'esecuzione di queste procedure richiede però l'intervento umano e non è sufficiente per garantire un flusso di integrazione e rilascio continuo. 
