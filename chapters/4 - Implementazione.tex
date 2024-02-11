@@ -69,7 +69,7 @@ jpackage fornisce due opzioni per modificare il comportamento nascosto all'utent
 
 %------------------------------------------------
 
-Il design elaborato nel capitolo precedente evidenziava la necessità di un task \textit{wrapper} che incapsulasse le opzioni e funzionalità di jpackage. La versatilità offerta da Gradle ha permesso di ottenere il risultato voluto attraverso \textit{jpackage-gradle-plugin}\footnote{https://github.com/petr-panteleyev/jpackage-gradle-plugin}: un plugin sviluppato dalla comunità. Questo componente introduce un tipo di task \texttt{JPackageTask} capace di: (i) configurare tutte le opzioni supportate da jpackage per qualsiasi versione del \ac{jdk}, (ii) definire blocchi eseguiti solamente su un sistema operativo specifico e (iii) testare le configurazioni attraverso la modalità \textit{dry run}. Il plugin introdotto però, non compensa uno dei limiti di jpackage esposto durante l'analisi dello strumento, ossia la necessità di eseguire il programma molteplici volte per ottenere tutte le tipologie di pacchetti. Per far fronte a questa restrizione, ho creato una tipologia personalizzata estendendo quella fornita dal plugin per modificare il suo comportamento in esecuzione, nello specifico il metodo contrassegnato come \texttt{@TaskAction}.
+Il design elaborato nel capitolo precedente evidenziava la necessità di un task \textit{wrapper} che incapsulasse le opzioni e funzionalità di jpackage. La versatilità offerta da Gradle ha permesso di ottenere il risultato voluto attraverso \textit{jpackage-gradle-plugin}\footnote{https://github.com/petr-panteleyev/jpackage-gradle-plugin}: un plugin sviluppato dalla comunità. Questo componente introduce un tipo di task \texttt{JPackageTask} capace di: (i) configurare tutte le opzioni supportate da jpackage per qualsiasi versione del \ac{jdk}, (ii) definire blocchi eseguiti solamente su un sistema operativo specifico e (iii) testare le configurazioni attraverso la modalità \textit{dry run}. Il plugin introdotto però, non compensa uno dei limiti di jpackage esposto durante l'analisi dello strumento, ossia la necessità di eseguire il programma molteplici volte per ottenere tutte le tipologie di pacchetti. Per far fronte a questa restrizione, ho creato una tipologia personalizzata (listato \ref{lst:custom-jpackage-task}) estendendo quella fornita dal plugin per modificare il suo comportamento in esecuzione, nello specifico il metodo contrassegnato come \texttt{@TaskAction}.
 
 \lstinputlisting[float,language=Kotlin,label={lst:custom-jpackage-task}, caption={Definizione di un tipo personalizzato per compensare il limite di jpackage}]{listings/custom-jpackage-task.kt}
 
@@ -79,16 +79,27 @@ Il design elaborato nel capitolo precedente evidenziava la necessità di un task
 
 \subsection{Distribuzione}
 
-Una volta impacchettato l'applicativo, quest'ultimo è pronto per essere installato e utilizzato dall'utente finale. In un contesto \ac{cicd} è fondamentale eseguire rilasci diffusi del software, che essi siano aggiornamenti sostanziosi oppure \textit{patch} risolutive di errori o vulnerabilità. Nei paragrafi seguenti saranno esposte le tecniche utilizzate per garantire rilasci consistenti e gli specifici requisiti che i repository coinvolti possiedono.
+Una volta impacchettato l'applicativo, quest'ultimo è pronto per essere installato e utilizzato dall'utente finale. In un contesto \ac{cicd} è fondamentale eseguire rilasci del software frequentemente, che essi siano aggiornamenti sostanziosi oppure \textit{patch} risolutive di errori o vulnerabilità. Nei paragrafi seguenti saranno esposte le tecniche utilizzate per garantire rilasci consistenti rispettando i requisiti che i repository coinvolti possiedono.
 
-\paragraph{Templating}
+\paragraph{Template} I soli pacchetti non sono sufficienti per pubblicare un applicativo, al contrario molto spesso questi non sono nemmeno necessari dal momento che i meta-dati associati contengono tutto l'occorrente per ottenerli. Quest'ultimi sono file descrittivi che seguono uno schema noto ed espongono le caratteristiche del pacchetto come autore, licenza, copyright, dipendenze e molti altri dettagli facoltativi e non. Spesso inoltre, lo schema richiede la presenza di un collegamento alla sorgente, ossia un \textit{url} localizzante il pacchetto in internet, di modo che non è necessario per i repository ospitare il pacchetto vero e proprio, ma solo un riferimento a questo. La piattaforma GitHub consente al rilascio di una nuova versione di pubblicare \textit{asset} ospitati dalla piattaforma stessa. L'url associato agli asset segue uno schema predefinito rendendolo facilmente riproducibile, come indicato nella figura \ref{fig:github-assets-url}.
+\begin{figure}[htb]\label{fig:github-assets-url}
+	\centering
+	\texttt{https://github.com/<PROPRIETARIO>/<NOME-APPLICATIVO>/\\ \tab releases/download/<VERSIONE>/<NOME-FILE>}
+	
+	\vspace{0.5cm}
+	
+	\texttt{https://github.com/AlchemistSimulator/Alchemist/\\ \tab releases/download/30.0.5/alchemist-30.0.5-1.x86\_64.rpm}
+	\caption{Schema URL per scaricare un asset da un rilascio GitHub ed esempio di URL localizzante un pacchetto di installazione RPM della versione 30.0.5}
+\end{figure}
 
+Come discusso in sezioni precedenti, i pacchetti su Arch Linux e più specificatamente \ac{aur}, sono descritti attraverso un file denominato PKGBUILD, il quale non è altro che uno script bash applicante uno schema predefinito. Tra i vari parametri alcuni di questi necessariamente cambiano ad ogni rilascio: la versione, la sorgente ed il checksum. Per rispondere a queste necessità ho introdotto un task nel build system incaricato di generare lo script PKGBUILD attraverso un \textit{template}. Il task \texttt{generatePKGBUILD} legge un file, detto template, contenente caratteri speciali con la funzione di segnaposto, sostituisce questi con i valori corretti e restituisce in output lo script pronto per essere installato. Nell'ottica di supportare test locali, attraverso un flag è possibile forzare l'inserimento di una sorgente locale, ossia il nome del pacchetto RPM.
 
+Discorso diverso vale per \textbf{winget}
 
 \paragraph{Script}
 
 \section{Automazione}
-Lo sezione precedente ha illustrato la generazione dei pacchetti, la preparazione necessaria alla distribuzione di essi e l'integrazione di questi processi all'interno del build system. Quest'ultimo serve da collegamento per soddisfare il requisito chiave dell'elaborato, l'automazione. 
+Lo sezione precedente ha illustrato la generazione dei pacchetti, la preparazione necessaria alla distribuzione di essi e l'integrazione di questi processi all'interno del build system. Quest'ultimo è essenziale per soddisfare il requisito chiave dell'elaborato, l'automazione. 
 
 \subsection{Test}
 
