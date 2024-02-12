@@ -50,14 +50,14 @@ Come discusso nelle precedenti sezioni riguardanti lo strumento jpackage (in par
 \begin{enumerate}
 	\item \texttt{jdeps}, analizza l'archivio contenente la nostra applicazione e restituisce i moduli jvm necessari per il corretto funzionamento di essa.
 	\item \texttt{jlink}, utilizza i moduli evidenziati da jdeps per creare una runtime-image personalizzata di dimensioni ridotte
-	\item \texttt{jpackage}, utilizza la runtime-image creata precedentemente assieme all'archivio dell'applicazione per generare il pacchetto: l'application-image.
+	\item \texttt{jpackage}, utilizza la runtime-image creata precedentemente assieme all'ar\-chi\-vio dell'applicazione per generare il pacchetto: l'application-image.
 \end{enumerate}
 
 \lstinputlisting[float,language=Bash,label={lst:jlink-runtime-image-creation}, caption={Comandi eseguiti per creare un java-runtime di dimensioni ridotte}]{listings/jpackage-jlink.sh}
 
 I comandi utilizzati nel processo sono indicati nel listato \ref{lst:jlink-runtime-image-creation}. In particolare l'esecuzione di jdeps coinvolge le seguenti opzioni:
 \begin{itemize}
-	\item \texttt{--print-module-deps} indica di restituire un output conforme all'input richiesto da jlink (modulo, modulo, ...),
+	\item \texttt{--print-module-deps} indica di restituire un output conforme all'input ri\-chie\-sto da jlink (modulo, modulo, ...),
 	\item \texttt{--add-modules} aggiunge attraverso la costante ALL-MODULE-PATH tutti i moduli per eseguire l'analisi,
 	\item \texttt{--ignore-missing-deps} non restituisce le dipendenze mancanti nell'output,
 	\item \texttt{--no-recursive} 

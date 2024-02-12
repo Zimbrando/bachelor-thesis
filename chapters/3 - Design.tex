@@ -50,7 +50,7 @@ Il ruolo principale del \textit{build system} è quello di esporre un \textit{ta
 	\caption{Diagramma delle attività rappresentante il processo di generazione dei pacchetti}
 	\label{fig:gradle-jpackage-scheme}
 \end{figure}
-\noindent Come discusso nella precedente sezione il design ultimato divide la generazione nei tre sistemi operativi target e mantiene una dipendenza con il task \texttt{jpackage-full:shadowJar}: il task generatore dell'archivio JAR full.
+\noindent Come discusso nella precedente sezione il design ultimato divide la generazione nei tre sistemi operativi target e mantiene una dipendenza con il task \\ \texttt{jpackage-full:shadowJar}: il task generatore dell'archivio JAR full.
 
 \section{Pipeline}
 Come introdotto precedentemente, la pipeline è l'elemento chiave per generare un processo automatico all'interno del flusso di lavoro del software. Alchemist è già provvisto di un processo adibito ai compiti descritti dal paradigma \ac{cicd} ossia: build, test e deploy. Il compito del design introdotto in questa sezione è quello di introdurre nuovi step che generano i pacchetti, controllano la loro validità e distribuiscono automaticamente il risultato della nuova versione nei repository selezionati.
@@ -85,7 +85,7 @@ I test sono direttamente collegati alla generazione dei pacchetti: una volte ass
 
 \section{Release}
 
-La pacchettizzazione di Alchemist, ottenuta attraverso jpackage, consente l'installazione nei diversi sistemi operativi delineati nei requisiti. Un altro fattore fondamentale è la distribuzione del software, l'utilizzo di strumenti di package management fornisce diversi vantaggi all'utente finale come: il download e l'installazione attraverso un semplice comando e la gestione automatica degli aggiornamenti. Per rendere disponibile il software al download attraverso strumenti di package management, è necessario pubblicare i pacchetti generati nei repository e far fronte a percorsi di validazione e controllo eseguiti dai manutentori.
+La pacchettizzazione di Alchemist, ottenuta attraverso jpackage, consente l'in\-stal\-la\-zio\-ne nei diversi sistemi operativi delineati nei requisiti. Un altro fattore fondamentale è la distribuzione del software, l'utilizzo di strumenti di package management fornisce diversi vantaggi all'utente finale come: il download e l'installazione attraverso un semplice comando e la gestione automatica degli aggiornamenti. Per rendere disponibile il software al download attraverso strumenti di package management, è necessario pubblicare i pacchetti generati nei repository e far fronte a percorsi di validazione e controllo eseguiti dai manutentori.
 
 \subsection{Repository}
 
