@@ -11,14 +11,14 @@ L'analisi del progetto espone il coinvolgimento di tre diversi componenti per co
 	\item \textbf{Release}: l'insieme delle procedure necessarie per la pubblicazione del software nel rispetto delle regole vigenti negli specifici repository pubblici.
 \end{itemize}
 I componenti interagiscono come raffigurato nella figura \ref{fig:activity-interaction-diagram} La pipeline sfrutta il build system per generare i pacchetti di installazione del software e integra tutti i processi necessari alla distribuzione negli specifici repository pubblici, producendo quindi l'automazione desiderata.
-\begin{figure}[H]
+\begin{figure}[htb]
 	\centering
 	\includegraphics[width=.9\linewidth]{figures/activity-interaction-diagram.pdf}
 	\caption{Diagramma delle attività raffigurante l'interazione tra i componenti}
 	\label{fig:activity-interaction-diagram}
 \end{figure}
 
-Nello schema si fa riferimento ad un generico \texttt{evento} come segnale di avvio della pipeline. Nell'ambito \ac{cicd} l'evento corrisponde spesso alla pubblicazione di nuovo codice nel repository, in questo modo l'eventuale inserimento di errori viene rilevato e comunicato ai responsabili dello sviluppo del progetto.
+Nello schema si fa riferimento ad un generico evento come segnale di avvio della pipeline. Nell'ambito \ac{cicd} l'evento corrisponde spesso alla pubblicazione di nuovo codice nel repository, in questo modo l'eventuale inserimento di errori viene rilevato e comunicato prontamente ai responsabili dello sviluppo del progetto.
 
 \section{Build system}
 
@@ -31,7 +31,7 @@ Il ruolo principale del \textit{build system} è quello di esporre un \textit{ta
 
 \subsection{JPackage}\label{sec:design-jpackage} Lo strumento \ac{cli} \textit{jpackage} offre un'interfaccia munita di diverse opzioni per configurare e personalizzare a piacimento i pacchetti in output. Esistono parametri generici, compatibili con tutte le piattaforme, e parametri specifici che vanno a modificare attributi particolari alla tipologia di pacchetto in output scelta. Uno dei motivi che ha portato alla scelta di \textit{jpackage} rispetto ad altri software è la capacità di includere autonomamente una \textit{runtime-image} di Java, ossia una \ac{jre} ridotta di dimensioni all'interno del pacchetto. La combinazione di una \textit{runtime-image} e degli archivi Java (JAR) necessari all'esecuzione dell'applicazione costituiscono l'\textit{application-image}: un pacchetto autocontenuto che include l'applicazione, assieme una \ac{jvm} ed alle librerie necessarie per eseguire quell'applicazione sulla piattaforma di destinazione.
 
-\paragraph{Application image} Alchemist è un progetto modulare ed ogni modulo è distribuito in un archivio JAR specifico. Come descritto nella documentazione\footnote{https://alchemistsimulator.github.io/howtos/preparation/jar/index.html} il software predispone due modalità di utilizzo stand-alone attraverso l'esecuzione degli archivi Java. La prima modalità consiste nell'inclusione dei singoli moduli richiesti come \textit{classpath} del processo di esecuzione. La seconda modalità sfrutta l'archivio denominato ``full", ossia un \textit{fat-jar} contenente tutti i moduli e tutte le dipendenze necessarie all'esecuzione del software in tutte le sue parti. In ottica di ridurre le dimensioni del pacchetto e velocizzare il processo di impacchettamento, jpackage costruirà l'\textit{application-image} utilizzando quest'ultimo. La posizione ed organizzazione dei file è diversa a seconda della piattaforma di destinazione del pacchetto, il risultato dell'installazione in un ambiente Linux è descritto nella figura 3.3.  
+\paragraph{Application image} Alchemist è un progetto modulare ed ogni modulo è distribuito in un archivio JAR specifico. Come descritto nella documentazione\footnote{https://alchemistsimulator.github.io/howtos/preparation/jar/index.html} il software predispone due modalità di utilizzo stand-alone attraverso l'esecuzione degli archivi Java. La prima modalità consiste nell'inclusione dei singoli moduli richiesti come \textit{classpath} del processo di esecuzione. La seconda modalità sfrutta l'archivio denominato ``full", ossia un \textit{fat-jar} contenente tutti i moduli e tutte le dipendenze necessarie all'esecuzione del software in tutte le sue parti. In ottica di ridurre le dimensioni del pacchetto e velocizzare il processo di impacchettamento, jpackage costruirà l'\textit{application-image} utilizzando quest'ultimo. La posizione ed organizzazione dei file è diversa a seconda della piattaforma di destinazione del pacchetto, il risultato dell'installazione in un ambiente Linux è descritto nella figura \ref{fig:activity-interaction-diagram}.  
 
 \begin{figure}
 	\centering
@@ -40,9 +40,9 @@ Il ruolo principale del \textit{build system} è quello di esporre un \textit{ta
 	\label{fig:application-image-folder-structure}
 \end{figure}
 
-\paragraph{Integrazione} Per introdurre jpackage nel build system è necessario un task che funga da \textit{wrapper}: il quale esponga proprietà corrispondenti alle opzioni della \ac{cli} di jpackage. Gradle utilizza una pratica denominata \textit{lazy configuration} che fornisce la dichiarazione delle \textit{lazy properties} vale a dire ``proprietà pigre". Questa caratteristica consente di legare una proprietà ad un'altra senza doversi preoccupare dell'ordine di esecuzione. In tale modo non sono necessarie particolari attenzioni nell'assegnazione di proprietà come la versione, la quale viene calcolata da un plugin apposito. Il programma jpackage, come illustrato nella sezione \ref{ssec:packaging}, non è \textit{cross-platform}, ciò significa che la generazione dei pacchetti deve essere eseguita su una macchina ospitante il sistema operativo di destinazione dei pacchetti richiesti. Per quanto lo strumento cerchi di unificare i diversi ambienti, ogni tipologia di pacchetto specialmente se di piattaforme diverse presenta limiti e regole differenti. Per questa ragione il task deve prevedere l'utilizzo di parametri differenti a seconda del sistema operativo sottostante.
+\paragraph{Integrazione} Per introdurre jpackage nel build system è necessario un task che funga da \textit{wrapper}: il quale esponga proprietà corrispondenti alle opzioni della \ac{cli} di jpackage. Gradle utilizza una pratica denominata \textit{lazy configuration} che fornisce la dichiarazione delle \textit{lazy properties} vale a dire ``proprietà pigre". Questa caratteristica consente di legare una proprietà ad un'altra senza doversi preoccupare dell'ordine di esecuzione. In tale modo non sono necessarie particolari attenzioni nell'assegnazione di proprietà come la versione, la quale viene calcolata da un plugin apposito. Il programma jpackage, come illustrato nella sezione \ref{sec:packaging}, non è \textit{cross-platform}, ciò significa che la generazione dei pacchetti deve essere eseguita su una macchina ospitante il sistema operativo di destinazione dei pacchetti richiesti. Per quanto lo strumento cerchi di unificare i diversi ambienti, ogni tipologia di pacchetto specialmente se di piattaforme diverse presenta limiti e regole differenti. Per questa ragione il task deve prevedere l'utilizzo di parametri differenti a seconda del sistema operativo sottostante.
 
-\subsection{Design finale} Il design derivante è raffigurato nella figura \ref{fig:gradle-jpackage-scheme}. 
+\subsection{Design finale} Il design ultimo è raffigurato nella figura \ref{fig:gradle-jpackage-scheme}. 
 
 \begin{figure}[htb]
 	\centering
@@ -50,52 +50,53 @@ Il ruolo principale del \textit{build system} è quello di esporre un \textit{ta
 	\caption{Diagramma delle attività rappresentante il processo di generazione dei pacchetti}
 	\label{fig:gradle-jpackage-scheme}
 \end{figure}
-\noindent Come discusso nella precedente sezione il design ultimato divide la generazione nei tre sistemi operativi target e mantiene una dipendenza con il task \\ \texttt{jpackage-full:shadowJar}: il task generatore dell'archivio JAR full.
+\noindent Come discusso nella precedente sezione il design divide la generazione nei tre sistemi operativi target e mantiene una dipendenza con \texttt{al\-che\-mi\-st\--fu\-ll\-:sha\-dow\-Jar\-}: il task incaricato di generare l'archivio JAR full.
 
 \section{Pipeline}
-Come introdotto precedentemente, la pipeline è l'elemento chiave per generare un processo automatico all'interno del flusso di lavoro del software. Alchemist è già provvisto di un processo adibito ai compiti descritti dal paradigma \ac{cicd} ossia: build, test e deploy. Il compito del design introdotto in questa sezione è quello di introdurre nuovi step che generano i pacchetti, controllano la loro validità e distribuiscono automaticamente il risultato della nuova versione nei repository selezionati.
-La pipeline attuale presenta diverse unità di esecuzione o \textit{job} che possono essere raggruppati per i loro ruoli elencati di seguito:
+La pipeline è l'elemento chiave per generare l'automazione dei processi descritti. Alchemist è già provvisto di una pipeline, la quale si occupa di analizzare il codice, verificare i processi di rilascio e in caso fosse necessario rilasciare una nuova versione. Il compito del design esplicato in questa sezione è quello di introdurre nuovi step con lo scopo di automatizzare la generazione e distribuzione dei pacchetti generati precedentemente. Le diverse unità di esecuzione o \textit{job} che popolano la pipeline possono essere distinti in base al loro ruolo.
 \begin{itemize}
-	\item \textbf{Inizializzazione pipeline}, tutte le unità incaricate di preparare l'ambiente di esecuzione della pipeline e quindi dei successivi job. 
+	\item \textbf{Inizializzazione}, tutte le unità incaricate di preparare l'ambiente di esecuzione della pipeline e quindi dei successivi job. 
 	\item \textbf{Build e analisi}, i job responsabili di analizzare, compilare ed eseguire i test del codice.
 	\item \textbf{Assemblaggio}, le unità di esecuzione responsabili della creazione di artefatti: archivi, pacchetti e documentazione.
 	\item \textbf{Test}, job i quali verificano la validità degli artefatti o operazioni come la distribuzione.
-	\item \textbf{Rilascio}, i componenti incaricati del rilascio di una nuova versione del software e relative operazioni accessorie.
+	\item \textbf{Rilascio}, i componenti incaricati al rilascio di una nuova versione del software e le relative operazioni accessorie.
 \end{itemize}
 
-I ruoli di interesse a questo progetto sono quello di assemblaggio e test.
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=.5\linewidth]{figures/pipeline-roles.pdf}
+	\caption{Diagramma dell'attività illustrante il comportamento dei job all'interno della pipeline}
+	\label{fig:workflow-roles-summary}
+\end{figure}
 
-\subsection{Generazione di artefatti}
-Per conseguire gli obiettivi dettati dal ruolo di assemblaggio è necessario l'utilizzo del build system. I job, le unità di esecuzione della piattaforma GitHub Actions, consentono l'esecuzione di comandi nella \textit{shell} default del sistema operativo presente nel runner. A tal proposito, la presenza di uno script \textit{gradle wrapper}\footnote{Script il quale scarica Gradle in una precisa versione nel momento dell'utilizzo, assicurando quindi l'esecuzione della stessa versione del build system in qualsiasi dispositivo} permette quindi di invocare il build system attraverso comandi da \textit{shell}.
+Il flusso è in sintesi raffigurato nella figura \ref{fig:workflow-roles-summary}. L'\textbf{inizializzazione} trova spazio al primo posto e la sua esecuzione è strettamente necessaria per il proseguimento del flusso. L'\textbf{assemblaggio} e \textbf{build} sono eseguiti parallelamente mentre i \textbf{test} devono inevitabilmente dipendere dalla fase di assemblaggio per poter verificare l'output prodotto da quest'ultimo. Il \textbf{rilascio} infine, richiede che tutte le fasi descritte precedentemente siano eseguite con successo. I ruoli concernenti il lavoro descritto da questo elaborato sono: assemblaggio e test.
 
-Precedentemente l'analisi ha illustrato la necessità dello strumento jpackage di essere utilizzato in un ambiente operante il sistema operativo di destinazione dei pacchetti. In ottica di soddisfare il requisito \textbf{multi-piattaforma} l'assemblaggio dei pacchetti deve essere eseguito in tutti e tre i sistemi operativi target. Le API di Actions permettono la definizione di una strategia a matrice, ovvero la possibilità di moltiplicare l'esecuzione di un job in più istanze con ambienti differenti. 
+\subsection{Interazione con il Build System}
+Per conseguire gli obiettivi dettati dai ruoli di assemblaggio e test è necessario l'utilizzo del build system. In particolare Alchemist sfrutta lo script \textit{gradle wrapper} per interagire con esso. Il file \textit{gradlew} è uno script che permette di eseguire Gradle senza doverlo installare globalmente: alla prima esecuzione controlla la versione richiesta definita in un file di configurazione, se quest'ultima non è presente allora il wrapper scarica questa e la utilizza per eseguire i task richiesti. I job, le unità di esecuzione della piattaforma GitHub Actions, consentono l'esecuzione di comandi nella \textit{shell} default (oppure una differente) del sistema operativo presente nel runner. In questo modo tramite comandi da shell è possibile eseguire lo script e fornire i task quali vogliamo eseguire come argomenti di questo.
 
 \subsection{Test delle funzionalità}
-Lo \textit{status} di un job indica il risultato dell'esecuzione di esso e può essere: \textit{failure}, \textit{success} oppure \textit{skipped}.
-L'esecuzione di un job è considerata in errore in caso l'esecuzione di un comando restituisca un valore diverso da 0 e viceversa di successo nel caso restituisca 0, perciò non sono necessarie particolari funzionalità per implementare un processo di verifica. Lo stato \textit{skipped}, invece, si riferisce ai job non eseguiti per condizioni configurate nel workflow. Il comportamento di default dello stato all'interno di una pipeline è bloccante per cui il fallimento di un test porta all'interruzione dell'intera pipeline. Alla luce di requisiti prestazionali è auspicabile suddividere i test all'interno di più job in modo che il test venga eseguito in un ambiente basilare senza potenziali modifiche che possono interferire con l'esito
-
-I test sono direttamente collegati alla generazione dei pacchetti: una volte assemblati successivamente deve essere verificato il loro corretto funzionamento.
+Lo \textit{status} di un job indica il risultato dell'esecuzione di esso e può essere: \textit{failure}, \textit{success} oppure \textit{skipped}. Lo stato di un job è considerato in errore nel caso l'esecuzione di un comando restituisca un valore diverso da 0 e viceversa di successo nel caso restituisca 0, perciò non sono necessarie particolari funzionalità per implementare un processo di verifica. Lo stato \textit{skipped}, invece, si riferisce ai job non eseguiti secondo condizioni specifiche descritte dallo sviluppatore, è quindi possibile gestire un unico workflow e modificare il suo flusso a seconda dell'evento che ha innescato l'esecuzione. Il comportamento di default dello stato all'interno di una pipeline è bloccante per cui il fallimento di un job porta all'interruzione dell'intera pipeline, come raffigurato nel diagramma \ref{fig:activity-diagram-job}.
 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.18\linewidth]{figures/activity-diagram-job.pdf}
-	\caption{Diagramma dell'attività illustrante il comportamento dei job all'interno della pipeline}
+	\caption{Diagramma dell'attività illustrante il processo attraverso i ruoli delineati}
 	\label{fig:activity-diagram-job}
 \end{figure}
 
 \section{Release}
 
-La pacchettizzazione di Alchemist, ottenuta attraverso jpackage, consente l'in\-stal\-la\-zio\-ne nei diversi sistemi operativi delineati nei requisiti. Un altro fattore fondamentale è la distribuzione del software, l'utilizzo di strumenti di package management fornisce diversi vantaggi all'utente finale come: il download e l'installazione attraverso un semplice comando e la gestione automatica degli aggiornamenti. Per rendere disponibile il software al download attraverso strumenti di package management, è necessario pubblicare i pacchetti generati nei repository e far fronte a percorsi di validazione e controllo eseguiti dai manutentori.
+Un ultimo fattore fondamentale è il rilascio e la distribuzione del software. 
 
 \subsection{Repository}
 
-Ogni repository funziona attraverso tipologie di pacchetti diverse e processi di pubblicazione e validazione differenti. Di seguito sarà illustrata un'analisi dei requisiti e regole dei principali ed infine un confronto.
+Ogni repository funziona attraverso tipologie di pacchetti diverse e processi di pubblicazione differenti. Di seguito saranno illustrate le regole vigenti nei vari citati in questo elaborato.
 
 \paragraph{AUR}
 
 \paragraph{WinGet}
 
-\paragraph{Snapcraft e Flathub}
+\paragraph{Snapcraft}
 
 \subsection{Conclusioni e punti comuni}
 
