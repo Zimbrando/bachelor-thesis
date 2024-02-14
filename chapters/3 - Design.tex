@@ -1,6 +1,5 @@
 %!TEX root = ../thesis-main.tex
 \chapter{Design}
-
 Alchemist, come esplicato nella sezione \ref{sec:alchemist}, è un software modulare complesso in continuo sviluppo, gli strumenti presentati nel capitolo precedente trovano già impiego nel progetto, ad eccezione del software di impacchettamento il quale è oggetto di questo elaborato. Di seguito sarà illustrata l'architettura e l'interazione tra i componenti principali che compaiono nel processo di automazione.
 
 \section{Architettura e macrostruttura}
@@ -50,7 +49,7 @@ Il ruolo principale del \textit{build system} è quello di esporre un \textit{ta
 	\caption{Diagramma delle attività rappresentante il processo di generazione dei pacchetti}
 	\label{fig:gradle-jpackage-scheme}
 \end{figure}
-\noindent Come discusso nella precedente sezione il design divide la generazione nei tre sistemi operativi target e mantiene una dipendenza con \texttt{al\-che\-mi\-st\--fu\-ll\-:sha\-dow\-Jar\-}: il task incaricato di generare l'archivio JAR full.
+\noindent Come discusso nella precedente sezione il design divide la generazione nei tre sistemi operativi target e la sua esecuzione dipende da \texttt{al\-che\-mi\-st\--fu\-ll\-:sha\-dow\-Jar\-}: il task incaricato di generare l'archivio JAR full. In questo modo, quando il task incaricato di generare i pacchetti con jpackage viene invocato, in primo luogo Gradle genera l'archivio JAR necessario a jpackage per costruire un application image valido.
 
 \section{Pipeline}
 La pipeline è l'elemento chiave per generare l'automazione dei processi descritti. Alchemist è già provvisto di una pipeline, la quale si occupa di analizzare il codice, verificare i processi di rilascio e in caso fosse necessario rilasciare una nuova versione. Il compito del design esplicato in questa sezione è quello di introdurre nuovi step con lo scopo di automatizzare la generazione e distribuzione dei pacchetti generati precedentemente. Le diverse unità di esecuzione o \textit{job} che popolano la pipeline possono essere distinti in base al loro ruolo.
@@ -61,46 +60,61 @@ La pipeline è l'elemento chiave per generare l'automazione dei processi descrit
 	\item \textbf{Test}, job i quali verificano la validità degli artefatti o operazioni come la distribuzione.
 	\item \textbf{Rilascio}, i componenti incaricati al rilascio di una nuova versione del software e le relative operazioni accessorie.
 \end{itemize}
-
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.5\linewidth]{figures/pipeline-roles.pdf}
-	\caption{Diagramma dell'attività illustrante il comportamento dei job all'interno della pipeline}
+	\caption{Diagramma dell'attività illustrante il flusso attraverso i ruoli delineati}
 	\label{fig:workflow-roles-summary}
 \end{figure}
+Il flusso è raffigurato nella figura \ref{fig:workflow-roles-summary}. L'\textbf{inizializzazione} trova spazio al primo posto e la sua esecuzione è strettamente necessaria per il proseguimento del flusso. L'\textbf{assemblaggio} e \textbf{build} sono eseguiti parallelamente mentre i \textbf{test} devono inevitabilmente dipendere dalla fase di assemblaggio per poter verificare l'output prodotto da quest'ultimo. Il \textbf{rilascio} infine, richiede che tutte le fasi descritte precedentemente siano eseguite con successo. I ruoli concernenti il lavoro descritto da questo elaborato sono: assemblaggio, test e rilascio.
 
-Il flusso è in sintesi raffigurato nella figura \ref{fig:workflow-roles-summary}. L'\textbf{inizializzazione} trova spazio al primo posto e la sua esecuzione è strettamente necessaria per il proseguimento del flusso. L'\textbf{assemblaggio} e \textbf{build} sono eseguiti parallelamente mentre i \textbf{test} devono inevitabilmente dipendere dalla fase di assemblaggio per poter verificare l'output prodotto da quest'ultimo. Il \textbf{rilascio} infine, richiede che tutte le fasi descritte precedentemente siano eseguite con successo. I ruoli concernenti il lavoro descritto da questo elaborato sono: assemblaggio e test.
+\subsection{Integrazione}
 
-\subsection{Interazione con il Build System}
-Per conseguire gli obiettivi dettati dai ruoli di assemblaggio e test è necessario l'utilizzo del build system. In particolare Alchemist sfrutta lo script \textit{gradle wrapper} per interagire con esso. Il file \textit{gradlew} è uno script che permette di eseguire Gradle senza doverlo installare globalmente: alla prima esecuzione controlla la versione richiesta definita in un file di configurazione, se quest'ultima non è presente allora il wrapper scarica questa e la utilizza per eseguire i task richiesti. I job, le unità di esecuzione della piattaforma GitHub Actions, consentono l'esecuzione di comandi nella \textit{shell} default (oppure una differente) del sistema operativo presente nel runner. In questo modo tramite comandi da shell è possibile eseguire lo script e fornire i task quali vogliamo eseguire come argomenti di questo.
+\paragraph{Interazione con il Build System} Per conseguire gli obiettivi dettati dai ruoli di assemblaggio e test è necessario l'utilizzo del build system. In particolare Alchemist sfrutta lo script \textit{gradle wrapper} per interagire con esso. Il file \textit{gradlew} è uno script che permette di eseguire Gradle senza doverlo installare globalmente: alla prima esecuzione controlla la versione richiesta definita in un file di configurazione, se quest'ultima non è presente allora il wrapper scarica questa e la utilizza per eseguire i task richiesti. I job, le unità di esecuzione della piattaforma GitHub Actions, consentono l'esecuzione di comandi nella \textit{shell} default (oppure una differente) del sistema operativo presente nel runner. In questo modo tramite comandi da shell è possibile eseguire lo script e fornire i task quali vogliamo eseguire come argomenti di questo.
 
-\subsection{Test delle funzionalità}
-Lo \textit{status} di un job indica il risultato dell'esecuzione di esso e può essere: \textit{failure}, \textit{success} oppure \textit{skipped}. Lo stato di un job è considerato in errore nel caso l'esecuzione di un comando restituisca un valore diverso da 0 e viceversa di successo nel caso restituisca 0, perciò non sono necessarie particolari funzionalità per implementare un processo di verifica. Lo stato \textit{skipped}, invece, si riferisce ai job non eseguiti secondo condizioni specifiche descritte dallo sviluppatore, è quindi possibile gestire un unico workflow e modificare il suo flusso a seconda dell'evento che ha innescato l'esecuzione. Il comportamento di default dello stato all'interno di una pipeline è bloccante per cui il fallimento di un job porta all'interruzione dell'intera pipeline, come raffigurato nel diagramma \ref{fig:activity-diagram-job}.
-
+\paragraph{Test delle funzionalità} Lo \textit{status} di un job indica il risultato dell'esecuzione di esso e può essere: \textit{failure}, \textit{success} oppure \textit{skipped}. Lo stato di un job è considerato in errore nel caso l'esecuzione di un comando restituisca un valore diverso da 0 e viceversa di successo nel caso restituisca 0, perciò non sono necessarie particolari funzionalità per implementare un processo di verifica. Lo stato \textit{skipped}, invece, si riferisce ai job non eseguiti secondo condizioni specifiche descritte dallo sviluppatore, è quindi possibile gestire un unico workflow e modificare il suo flusso a seconda dell'evento che ha innescato l'esecuzione. Il comportamento dei job di default all'interno di una pipeline è bloccante per cui il fallimento di uno porta all'interruzione dell'intera pipeline, come raffigurato nel diagramma \ref{fig:activity-diagram-job}.
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.18\linewidth]{figures/activity-diagram-job.pdf}
-	\caption{Diagramma dell'attività illustrante il processo attraverso i ruoli delineati}
+	\caption{Diagramma dell'attività illustrante il comportamento dei job all'interno della pipeline}
 	\label{fig:activity-diagram-job}
 \end{figure}
 
-\section{Release}
+\subsection{Risultato}
 
-Un ultimo fattore fondamentale è il rilascio e la distribuzione del software. 
+Lo schema risultante presenta diverse nuove attività: nel ruolo di assemblaggio la generazione dei pacchetti, nella fase di test numerose verifiche che controllano la validità di pacchetti e la pubblicazione di questi nei repository, infine nel rilascio le azioni necessarie alla pubblicazione.
+
+%FIGURA
+
+\section{Release}
+La release di un software ricopre una fase fondamentale all'interno di un contesto \ac{cicd}. Essa integra tutte le modifiche apportate al software (previa validazione e test automatico di queste) dalla precedente release fino all'istante in cui la nuova viene creata. Successivamente al rilascio è necessario distribuire il software attraverso supporti di installazione adeguati e diffonderlo efficacemente per assicurare all'utente l'utilizzo della versione più aggiornata dell'applicativo.
 
 \subsection{Repository}
+Nell'ambito dei package management system, i repository sono i database online da cui i gestori di pacchetti reperiscono gli applicativi. Più genericamente, si intende un qualsiasi archivio online da cui è possibile scaricare software. Ogni repository supporta tipologie di pacchetti e modalità di pubblicazione differenti, le quali sono discusse nella seguente sezione.
 
-Ogni repository funziona attraverso tipologie di pacchetti diverse e processi di pubblicazione differenti. Di seguito saranno illustrate le regole vigenti nei vari citati in questo elaborato.
+\paragraph{AUR} L'Arch User Repository richiede la compilazione di un file PKGBUILD, ossia uno script contenente gli step necessari a scaricare, estrarre, compilare ed infine installare il software. Lo script segue uno schema predefinito con parametri obbligatori ed altri facoltativi che modificano i meta-dati del pacchetto risultante. Oltre alla presenza di diversi attributi standard come: nome, versione, descrizione, licenza ed altri, attraverso delle funzioni predefinite è possibile modificare il processo di installazione utilizzando il linguaggio bash. Una volta eseguito il PKGBUILD attraverso il comando \texttt{makepkg}, questo clona il repository o scarica il pacchetto indicato come sorgente, successivamente sono le funzioni a determinare come dall'input ottenuto si ricava il programma installato nel sistema.
+Le funzioni sono eseguite nel seguente ordine: (i) prepare, eseguita appena dopo che è stato scaricato ed estratto il pacchetto indicato nella sorgente, (ii) pkgver, utilizzata per stabilire la versione del pacchetto se questa non è già stata impostata direttamente, (iii) build, i comandi necessari a compilare il software (se necessario), (iv) check, verifica che gli step precedenti siano stati eseguiti correttamente ed infine (v) package, l'installazione dei file nel filesystem. Per non modificare direttamente il filesystem del computer installante, \texttt{makepkg} crea due directory \textit{pkg} e \textit{src}. All'interno di src, esso estrae il pacchetto e tutto il suo contenuto, mentre pkg consiste in un ambiente che simula il filesystem del sistema. In fase di installazione sarà il package manager a replicare la struttura della directory pkg nel filesystem del sistema installante.
 
-\paragraph{AUR}
+Una volta scritto lo script il pacchetto è pronto per essere installato e quindi pubblicato. Attraverso un programma fornito da Arch di nome \texttt{namcap} è possibile controllare che la sintassi ed i valori inseriti nello script siano validi. I pacchetti all'interno dell'\ac{aur} consistono in repository git contenenti il PKGBUILD ed altri file di configurazione opzionali, il processo di pubblicazione dunque è simile a qualsiasi progetto con un sistema di version control: la creazione di un commit e la pubblicazione di esso.
 
-\paragraph{WinGet}
+\paragraph{Winget} Il package manager winget presenta una struttura simile, un pacchetto è formato da diversi file \textit{manifest} i quali descrivono i meta-dati del pacchetto nel linguaggio YAML. A differenza del PKGBUILD, non ci sono script e non esistono funzioni, l'intera configurazione è descrittiva e non presenta la possibilità di modificare più specificatamente l'installazione del pacchetto.
 
-\paragraph{Snapcraft}
+\subsection{Semantic release}
+Il processo di \ac{cicd} utilizzato da Alchemist, prevede l'utilizzo di una tecnica chiamata \textit{semantic release}, legata con il più conosciuto concetto di \textit{semantic versioning}. Abbreviato come ``SemVer", esso è uno schema di versionamento standardizzato per determinare le versioni di un software. È stato progettato per rendere intuitivo comprendere le modifiche apportate al software ed il loro impatto riguardo la compatibilità con le versioni precedenti. Lo schema descrive una versione come tre cifre principali separate da punti.
+\begin{itemize}
+	\item La prima cifra, \textbf{major}, si incrementa quando vengono apportate modifiche sostanziali al software che lo rendono incompatibile con le versioni precedenti.
+	\item La seconda, \textbf{minor}, indica l'aggiunta di nuove funzionalità o miglioramenti al software senza eliminare la retro-compatibilità di questo.
+	\item La terza cifra, \textbf{patch}, viene incrementata quando una nuova versione risolve bug o problemi di sicurezza.
+\end{itemize}
+Oltre allo schema principale, SemVer prevede anche la presenza di etichette che stabiliscono se la versione è in fase di sviluppo(alpha, beta) oppure di test.
+Attraverso l'utilizzo dei \textit{conventional commits}, il progetto è capace di: stabilire la versione autonomamente, elencare le modifiche tra un rilascio e quello successivo in un \textit{changelog} e decidere quando è necessaria la pubblicazione di una nuova versione. I conventional commits sono un insieme di regole che riguardano i messaggi dei commit, ossia le parti di testo allegate alla modifica del software che lo sviluppatore annette. Le regole stabiliscono una sintassi predefinita che permette di comprendere attraverso la cronologia dei commit le modifiche apportate al software, ed inoltre assieme allo schema SemVer permette a tool automatici di calcolare la versione.
 
-\subsection{Conclusioni e punti comuni}
+\paragraph{Limitazioni} La creazione dei rilasci avviene attraverso un plugin che opera all'interno di un job dedicato nella pipeline. Il job ``Release": 
+\begin{enumerate}
+	\item invoca il processo di rilascio eseguendo \texttt{npx semantic-release},
+	\item il plugin controlla se è necessario eseguire un rilascio e in caso positivo procede caricando la configurazione descritta nel file ``release.config.js",
+	\item dopo aver creato la release su GitHub con gli assets evidenziati, esegue il comando descritto nella configurazione.
+\end{enumerate}
+L'unica azione direttamente collegata alla pubblicazione è il comando eseguito dal runner che prende in carico il job. Questo dettaglio crea delle restrizioni: (i) sul sistema operativo, perché solo un job può prendere in carico il lavoro di rilascio e di conseguenza un solo runner con uno specifico sistema operativo esegue il comando, (ii) la pubblicazione dei pacchetti deve avvenire mediante l'utilizzo di comandi da shell.
 
-%Ad esempio il metodo del templating? 
-%La presenza di uno script bash? 
-%Le richieste necessarie nella pull-request?
-%Esiste la possibilità di fare dei test? 
+

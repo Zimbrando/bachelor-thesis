@@ -1,10 +1,10 @@
 %!TEX root = ../thesis-main.tex
 
 % Percorso implementativo:
-% 	- jpackage e le opzioni in dettaglio
-%  	- jlink e jdeps
-%   - il plugin gradle per operare con jpackage
-%   - la necessità di estendere con jpackageFull
+% 	V- jpackage e le opzioni in dettaglio
+%  	V- jlink e jdeps
+%   V- il plugin gradle per operare con jpackage
+%   V- la necessità di estendere con jpackageFull
 %   - inserimento dei test e della release dei pacchetti
 %   - le operazioni per la distribuzione e il test di queste (AUR)
 
@@ -12,9 +12,9 @@
 
 Nel seguente capitolo è illustrato il percorso e le relative scelte implementative effettuate per soddisfare i requisiti posti dal progetto. Successivamente, valuterò il lavoro svolto considerando i requisiti non funzionali posti.
 
-\section{Impacchettamento e distribuzione}
+\section{Pacchettizzazione e distribuzione}
 
-\subsection{Impacchettamento}
+\subsection{Pacchettizzazione}
 Come discusso nelle precedenti sezioni riguardanti lo strumento jpackage (in particolare sezione \ref{sec:design-jpackage}), esso presenta una notevole quantità di opzioni sia inerenti l'aspetto estetico (come nome dell'applicazione, icona, copyright ed altri), sia riguardo aspetti tecnici che possono contraddistinguere la qualità del pacchetto di installazione.
 \def\arraystretch{1.5}%  1 is the default, change whatever you need
 \begin{table}[htb]\label{tab:jpackage-options}
@@ -63,19 +63,17 @@ I comandi utilizzati nel processo sono indicati nel listato \ref{lst:jlink-runti
 	\item \texttt{--no-recursive} 
 \end{itemize}
 
-jpackage fornisce due opzioni per modificare il comportamento nascosto all'utente di jlink: \texttt{--jlink-options} e \texttt{--add-modules}. Il comando risultante (non comprendente le opzioni estetiche) utilizzando le opzioni descritte nella tabella \ref{tab:jpackage-options} è il seguente:
+Il comando jpackage fornisce due opzioni per modificare il comportamento nascosto all'utente di jlink: \texttt{--jlink-options} e \texttt{--add-modules}. Il comando risultante (non comprendente le opzioni estetiche) utilizzando le opzioni descritte nella tabella \ref{tab:jpackage-options} è il seguente:
 
 \texttt{\\ jpackage --input build/package-input \\ \tab\tab --main-jar alchemist-full-VERSION.jar \\ \tab\tab --main-class it.unibo.alchemist.Alchemist \\ \tab\tab --type \{rpm, deb\} \\ \tab\tab --add-modules \\ \tab\tab --jlink-options \\}
 
+%Confronto, scelta tra i due full o solo moduli, il guadagno in %, perché in alchemist è così poco ed in altre applicazioni potrebbe essere molto maggiore, analisi della reflection step necessario al funzionamento
+
 %------------------------------------------------
 
-Il design elaborato nel capitolo precedente evidenziava la necessità di un task \textit{wrapper} che incapsulasse le opzioni e funzionalità di jpackage. La versatilità offerta da Gradle ha permesso di ottenere il risultato voluto attraverso \textit{jpackage-gradle-plugin}\footnote{https://github.com/petr-panteleyev/jpackage-gradle-plugin}: un plugin sviluppato dalla comunità. Questo componente introduce un tipo di task \texttt{JPackageTask} capace di: (i) configurare tutte le opzioni supportate da jpackage per qualsiasi versione del \ac{jdk}, (ii) definire blocchi eseguiti solamente su un sistema operativo specifico e (iii) testare le configurazioni attraverso la modalità \textit{dry run}. Il plugin introdotto però, non compensa uno dei limiti di jpackage esposto durante l'analisi dello strumento, ossia la necessità di eseguire il programma molteplici volte per ottenere tutte le tipologie di pacchetti. Per far fronte a questa restrizione, ho creato una tipologia personalizzata (listato \ref{lst:custom-jpackage-task}) estendendo quella fornita dal plugin per modificare il suo comportamento in esecuzione, nello specifico il metodo contrassegnato come \texttt{@TaskAction}.
+\paragraph{Plugin} Il design elaborato nel capitolo precedente evidenziava la necessità di un task \textit{wrapper} che incapsulasse le opzioni e funzionalità di jpackage. La versatilità offerta da Gradle ha permesso di ottenere il risultato voluto attraverso \textit{jpackage-gradle-plugin}\footnote{https://github.com/petr-panteleyev/jpackage-gradle-plugin}: un plugin sviluppato dalla comunità. Questo componente introduce un tipo di task \texttt{JPackageTask} capace di: (i) configurare tutte le opzioni supportate da jpackage per qualsiasi versione del \ac{jdk}, (ii) definire blocchi eseguiti solamente su un sistema operativo specifico e (iii) testare le configurazioni attraverso la modalità \textit{dry run}. Il plugin introdotto però, non compensa uno dei limiti di jpackage esposto durante l'analisi dello strumento, ossia la necessità di eseguire il programma molteplici volte per ottenere tutte le tipologie di pacchetti. Per far fronte a questa restrizione, ho creato una tipologia personalizzata (listato \ref{lst:custom-jpackage-task}) estendendo quella fornita dal plugin per modificare il suo comportamento in esecuzione, nello specifico il metodo contrassegnato come \texttt{@TaskAction}.
 
 \lstinputlisting[float,language=Kotlin,label={lst:custom-jpackage-task}, caption={Definizione di un tipo personalizzato per compensare il limite di jpackage}]{listings/custom-jpackage-task.kt}
-
-\paragraph{Risultato}
-
-%Confronto, scelta tra i due full o solo moduli, il guadagno in %, perché in alchemist è così poco ed in altre applicazioni potrebbe essere molto maggiore
 
 \subsection{Distribuzione}
 
@@ -93,8 +91,6 @@ Una volta impacchettato l'applicativo, quest'ultimo è pronto per essere install
 \end{figure}
 
 Come discusso in sezioni precedenti, i pacchetti su Arch Linux e più specificatamente \ac{aur}, sono descritti attraverso un file denominato PKGBUILD, il quale non è altro che uno script bash applicante uno schema predefinito. Tra i vari parametri alcuni di questi necessariamente cambiano ad ogni rilascio: la versione, la sorgente ed il checksum. Per rispondere a queste necessità ho introdotto un task nel build system incaricato di generare lo script PKGBUILD attraverso un \textit{template}. Il task \texttt{generatePKGBUILD} legge un file, detto template, contenente caratteri speciali con la funzione di segnaposto, sostituisce questi con i valori corretti e restituisce in output lo script pronto per essere installato. Nell'ottica di supportare test locali, attraverso un flag è possibile forzare l'inserimento di una sorgente locale, ossia il nome del pacchetto RPM.
-
-Discorso diverso vale per \textbf{winget}
 
 \paragraph{Script}
 
