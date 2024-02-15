@@ -16,14 +16,15 @@ Nel seguente capitolo è illustrato il percorso e le relative scelte implementat
 
 \subsection{Pacchettizzazione}
 Come discusso nelle precedenti sezioni riguardanti lo strumento jpackage (in particolare sezione \ref{sec:design-jpackage}), esso presenta una notevole quantità di opzioni sia inerenti l'aspetto estetico (come nome dell'applicazione, icona, copyright ed altri), sia riguardo aspetti tecnici che possono contraddistinguere la qualità del pacchetto di installazione.
-\def\arraystretch{1.5}%  1 is the default, change whatever you need
-\begin{table}[htb]\label{tab:jpackage-options}
+\def\arraystretch{1.5}
+\begin{table}[htb]
+	\label{fig:jpackage-options}
 	\begin{tabular}{|l|l|l|}
 		\hline
 		\rowcolor[HTML]{ECF4FF} 
 		\multicolumn{1}{|c|}{\cellcolor[HTML]{ECF4FF}{\ul Opzione}} &
-		\multicolumn{1}{c|}{\cellcolor[HTML]{ECF4FF}{\ul Funzionalità}} &
-		\multicolumn{1}{c|}{\cellcolor[HTML]{ECF4FF}{\ul Eventuali parametri}} \\ \hline
+		\multicolumn{1}{|c|}{\cellcolor[HTML]{ECF4FF}{\ul Funzionalità}} &
+		\multicolumn{1}{|c|}{\cellcolor[HTML]{ECF4FF}{\ul Eventuali parametri}} \\ \hline
 		\texttt{--type} &
 		Tipologia di pacchetto in output &
 		\begin{tabular}[c]{@{}l@{}}rpm, deb, exe, msi, \\ pkg, dmg\end{tabular} \\ \hline
@@ -41,12 +42,12 @@ Come discusso nelle precedenti sezioni riguardanti lo strumento jpackage (in par
 		\begin{tabular}[c]{@{}l@{}}Lista dei moduli separata\\ da ','\end{tabular} \\ \hline
 		\texttt{--jlink-options} &
 		\begin{tabular}[c]{@{}l@{}}Ulteriori opzioni per\\ l'esecuzione di jlink\end{tabular} &
-		Lista delle opzioni \\ \hline
+		Lista delle opzioni \\ 
 	\end{tabular}
 	\caption{Tabella che elenca le principali opzioni tecniche del comando \texttt{jpackage}}
 \end{table}
 
-\paragraph{Ottimizzazione} Per comprendere le scelte implementative riguardo le opzioni di carattere tecnico è necessario introdurre altri due strumenti del \ac{jdk}: (i) \texttt{jlink}, strumento delegato alla produzione della \textit{runtime-image} inserita all'interno del pacchetto e (ii) \texttt{jdeps}, comando utilizzabile per analizzare le dipendenze di un archivio JAR. Il primo ha la peculiarità di consentire la creazione di immagini personalizzate contenente solo i componenti necessari per eseguire un'applicazione specifica, riducendo così le dimensioni complessive e incrementando le prestazioni dell'applicazione. Per ottenere i componenti necessari si utilizza il secondo, jdeps, applicato all'archivio JAR contenente l'intera applicazione. In sintesi la generazione del pacchetto richiede l'utilizzo dei tre strumenti a catena come esposto di seguito:
+\paragraph{Ottimizzazione} Per comprendere le scelte implementative riguardo le opzioni di carattere tecnico è necessario introdurre altri due strumenti del \ac{jdk}: (i) \texttt{jlink}, strumento delegato alla produzione della \textit{runtime-image} inserita all'interno del pacchetto e (ii) \texttt{jdeps}, comando utilizzabile per analizzare le dipendenze di un archivio JAR. Il primo ha la peculiarità di consentire la creazione di immagini personalizzate contenente solo i componenti necessari per eseguire un'applicazione specifica, riducendo così le dimensioni complessive e incrementando le prestazioni dell'applicazione. Per ottenere i componenti necessari si utilizza il secondo, jdeps, applicandolo all'archivio JAR contenente l'intera applicazione. In sintesi la generazione del pacchetto richiede l'utilizzo dei tre strumenti consecutivamente come esposto di seguito:
 \begin{enumerate}
 	\item \texttt{jdeps}, analizza l'archivio contenente la nostra applicazione e restituisce i moduli jvm necessari per il corretto funzionamento di essa.
 	\item \texttt{jlink}, utilizza i moduli evidenziati da jdeps per creare una runtime-image personalizzata di dimensioni ridotte
@@ -57,17 +58,22 @@ Come discusso nelle precedenti sezioni riguardanti lo strumento jpackage (in par
 
 I comandi utilizzati nel processo sono indicati nel listato \ref{lst:jlink-runtime-image-creation}. In particolare l'esecuzione di jdeps coinvolge le seguenti opzioni:
 \begin{itemize}
-	\item \texttt{--print-module-deps} indica di restituire un output conforme all'input ri\-chie\-sto da jlink (modulo, modulo, ...),
-	\item \texttt{--add-modules} aggiunge attraverso la costante ALL-MODULE-PATH tutti i moduli per eseguire l'analisi,
+	\item \texttt{--print-module-deps} indica di restituire un output conforme all'input ri\-chie\-sto da jlink,
+	\item \texttt{--add-modules} aggiunge attraverso la costante ``ALL-MODULE-PATH" tutti i moduli per eseguire l'analisi,
 	\item \texttt{--ignore-missing-deps} non restituisce le dipendenze mancanti nell'output,
-	\item \texttt{--no-recursive} 
+	\item \texttt{--no-recursive} esegue un analisi solo al primo livello di dipendenza.
 \end{itemize}
 
-Il comando jpackage fornisce due opzioni per modificare il comportamento nascosto all'utente di jlink: \texttt{--jlink-options} e \texttt{--add-modules}. Il comando risultante (non comprendente le opzioni estetiche) utilizzando le opzioni descritte nella tabella \ref{tab:jpackage-options} è il seguente:
+Le opzioni configurate nell'utilizzo di jlink sono quelle di default che jpackage utilizza: \texttt{--no-header-files} e \texttt{--no-man-pages} precludono l'inserimento dei file header e dei manuali per diminuire ulteriormente la dimensione della runtime-image.
+Il comando jpackage completo utilizzando le opzioni descritte nella tabella \ref{fig:jpackage-options} è il seguente:
 
-\texttt{\\ jpackage --input build/package-input \\ \tab\tab --main-jar alchemist-full-VERSION.jar \\ \tab\tab --main-class it.unibo.alchemist.Alchemist \\ \tab\tab --type \{rpm, deb\} \\ \tab\tab --add-modules \\ \tab\tab --jlink-options \\}
+\texttt{\\ jpackage --input build/package-input \\ \tab\tab --main-jar alchemist-full-VERSION.jar \\ \tab\tab --main-class it.unibo.alchemist.Alchemist \\ \tab\tab --type \{rpm, deb\} \\ \tab\tab --add-modules \$DEPENDENCIES \\ \tab\tab --jlink-options no-header-file, no-man-pages \\}
 
 %Confronto, scelta tra i due full o solo moduli, il guadagno in %, perché in alchemist è così poco ed in altre applicazioni potrebbe essere molto maggiore, analisi della reflection step necessario al funzionamento
+
+Il risultato ottenuto è interessante, la differenza tra i due dati è buona.
+Il simulatore Alchemist è estendibile, ed ottiene questa caratteristica sfruttando la reflection.
+
 
 %------------------------------------------------
 
@@ -77,7 +83,7 @@ Il comando jpackage fornisce due opzioni per modificare il comportamento nascost
 
 \subsection{Distribuzione}
 
-Una volta impacchettato l'applicativo, quest'ultimo è pronto per essere installato e utilizzato dall'utente finale. In un contesto \ac{cicd} è fondamentale eseguire rilasci del software frequentemente, che essi siano aggiornamenti sostanziosi oppure \textit{patch} risolutive di errori o vulnerabilità. Nei paragrafi seguenti saranno esposte le tecniche utilizzate per garantire rilasci consistenti rispettando i requisiti che i repository coinvolti possiedono.
+Una volta impacchettato l'applicativo, quest'ultimo è pronto per essere installato e utilizzato dall'utente finale. Nei paragrafi seguenti saranno esposte le tecniche utilizzate per garantire rilasci consistenti rispettando i requisiti che i repository coinvolti possiedono.
 
 \paragraph{Template} I soli pacchetti non sono sufficienti per pubblicare un applicativo, al contrario molto spesso questi non sono nemmeno necessari dal momento che i meta-dati associati contengono tutto l'occorrente per ottenerli. Quest'ultimi sono file descrittivi che seguono uno schema noto ed espongono le caratteristiche del pacchetto come autore, licenza, copyright, dipendenze e molti altri dettagli facoltativi e non. Spesso inoltre, lo schema richiede la presenza di un collegamento alla sorgente, ossia un \textit{url} localizzante il pacchetto in internet, di modo che non è necessario per i repository ospitare il pacchetto vero e proprio, ma solo un riferimento a questo. La piattaforma GitHub consente al rilascio di una nuova versione di pubblicare \textit{asset} ospitati dalla piattaforma stessa. L'url associato agli asset segue uno schema predefinito rendendolo facilmente riproducibile, come indicato nella figura \ref{fig:github-assets-url}.
 \begin{figure}[htb]\label{fig:github-assets-url}
@@ -94,13 +100,14 @@ Come discusso in sezioni precedenti, i pacchetti su Arch Linux e più specificat
 
 \paragraph{Script}
 
-\section{Automazione}
-Lo sezione precedente ha illustrato la generazione dei pacchetti, la preparazione necessaria alla distribuzione di essi e l'integrazione di questi processi all'interno del build system. Quest'ultimo è essenziale per soddisfare il requisito chiave dell'elaborato, l'automazione. 
+\section{Sviluppo della pipeline}
 
-\subsection{Test}
+Per soddisfare i requisiti di automazione è stato necessario aggiornare l'architettura della pipeline di Alchemist. In particolare l'obiettivo consiste nell'estendere le sue funzionalità mantenendo l'attuale struttura.
 
-\subsection{Release}
+\lstinputlisting[float,language=Kotlin,label={lst:package-generation}, caption={Il job incaricato alla generazione dei pacchetti}]{listings/package-generation.yml}
+
+\subsection{Test dei processi}
 
 \section{Valutazione}
 
-- Cosa cambiare, ottimizzazioni
+%-Cosa cambiare, ottimizzazioni

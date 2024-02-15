@@ -1,0 +1,42 @@
+# Test PKGBUILD for aur release
+test-aur-package:
+  needs: 
+    - select-java-version
+    - build
+  runs-on:  ubuntu-22.04
+  container: 
+    image: archlinux:base-devel-20240101.0.204074
+  concurrency:
+    group: ${{ github.workflow }}-test-aur-release-${{ github.event.number || github.ref }}
+    cancel-in-progress: true
+  steps:
+    - name: Setup arch
+      run: |
+        sudo pacman --noconfirm -Syu 
+        sudo pacman --noconfirm -Sy git rpm-tools
+    - run: git config --system --add safe.directory /__w/Alchemist/Alchemist # https://github.com/actions/checkout/issues/1169
+    - name: Checkout
+      uses: danysk/action-checkout@0.2.14
+    - name: Setup Java
+      uses: actions/setup-java@v4.0.0
+      with:
+        java-version: ${{ needs.select-java-version.outputs.java-version }}
+        distribution: 'temurin'
+    - name: Download packages
+      uses: actions/download-artifact@v4.1.1
+      with:
+        pattern: installer-package-Linux
+        path: build/package/
+        merge-multiple: true
+    - name: Generate PKGBUILD
+      run: ./gradlew generatePKGBUILD -DgeneratePKGBUILD.testSource=true
+    - name: Makepkg Build and Check
+      uses: edlanglois/pkgbuild-action@v1
+      with:
+        pkgdir: build/package
+    - name: Test installation
+      working-directory: build/package
+      run: |
+        sudo pacman -U --noconfirm alchemist-*.zst
+        (sudo pacman -Q | grep -q alchemist &&  echo "Success! Alchemist found in the package list") || exit 1
+        (/usr/bin/alchemist --help | grep -q options_list && echo "Success! Alchemist available") || exit 2
