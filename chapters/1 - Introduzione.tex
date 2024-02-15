@@ -11,7 +11,7 @@ Il mondo del software ha scritto diverse decadi di storia. Sin dagli anni '50, q
 Con l'avvento di internet il concetto di software come un entità sviluppata e finita ha completamente cessato di esistere. Mediante la rete è diventato semplice ed efficiente distribuire un programma e fornire un ulteriore supporto attraverso aggiornamenti evolutivi e correttivi. Il fenomeno è cresciuto tanto da aver dato luce alla pratica del rilascio di applicazioni deliberatamente non complete, le quali attraverso il feedback degli utenti evolvono verso un prodotto finito. Il manifesto agile ha introdotto la cultura di emettere frequenti rilasci di nuove versioni del software, rendendo la distribuzione un punto cardine all'interno del ciclo di vita di esso. Dietro lo sviluppo rapido di nuove funzionalità è necessario il rilascio di queste altrettanto velocemente, la filosofia DevOps nasce per soddisfare questa esigenza.
 
 \subsection{DevOps}
-La metodologia DevOps (termine nato dalla contrazione di ``Development" ed ``Operations") si è formata intorno al 2008 con l'idea chiave di unire il team di sviluppo ed il team delle operazioni (infrastruttura). Spesso accade all'interno di organizzazioni di grandi dimensioni che questi due componenti fondamentali siano separati, ossia il rilascio dell'applicazione avviene dopo che il processo di sviluppo è terminato, senza la possibilità tra i due di coordinarsi durante l'esecuzione. La filosofia DevOps promuove l'unione dei due reparti per garantire la distribuzione di software di maggior qualità in modo continuo e controllato. Essi sono considerati un'unica entità e cooperano seguendo un modello come descritto nella figura \ref{fig:devops-process}.
+La metodologia DevOps (termine nato dalla contrazione di ``Development" ed ``Operations") si è formata intorno al 2008 con l'idea chiave di unire il team di sviluppo ed il team operativo (responsabile dell'infrastruttura del prodotto). Spesso accade all'interno di organizzazioni di grandi dimensioni che questi due componenti fondamentali siano separati, ossia il rilascio dell'applicazione avviene dopo che il processo di sviluppo è terminato, senza la possibilità tra i due di coordinarsi durante l'esecuzione. La filosofia DevOps promuove l'unione dei due reparti per garantire la distribuzione di software di maggior qualità in modo continuo e controllato. Essi sono considerati un'unica entità e cooperano seguendo un modello come descritto nella figura \ref{fig:devops-process}.
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.9\linewidth]{figures/devops-process.png}
@@ -23,23 +23,22 @@ Il modello mette in risalto le fasi e il rispettivo reparto di appartenenza, men
 
 Uno dei principi base della filosofia DevOps è l'utilizzo di pratiche di \ac{cicd}, ossia automazione dell'integrazione e distribuzione del software. Automatizzando le fasi descritte precedentemente si elimina l'intervento umano garantendo rilasci più rapidi e di maggior qualità.
 
-\paragraph{Continuous integration} L'integrazione è costituita dalle operazioni di build e test del codice, essa diventa continuativa dal momento che si inserisce l'automazione nell'equazione. Un processo generalmente è formato secondo i seguenti step: (i) gli sviluppatori introducono nuovo codice nel progetto attraverso il software di \textit{version control} (per esempio git), (ii) un server ottiene la modifica ed esegue il build ed i test del progetto nella sua interezza, (iii) una volta completato il processo comunica l'esito delle operazioni agli sviluppatori. In questo modo le nuove parti di codice sono costantemente controllate riducendo al minimo la potenziale presenza di bug, migliorando in tutto e per tutto la qualità del progetto.
-Un fattore molto importante è la stesura di test: più questi hanno una copertura maggiore, più saranno lenti nell'esecuzione e rallenteranno il processo di integrazione. È essenziale quindi calibrare la loro copertura secondo le esigenze del progetto, ricordando che una copertura totale migliora notevolmente la qualità del prodotto.
+\paragraph{Continuous integration} L'integrazione è costituita dalle operazioni di build e test del codice, essa diventa continuativa dal momento che si inserisce l'automazione nell'equazione. Un processo generalmente è formato secondo i seguenti step: (i) gli sviluppatori introducono nuovo codice nel progetto attraverso il software di \textit{version control}, (ii) un server ottiene la modifica ed esegue il build ed i test del progetto nella sua interezza, (iii) una volta completato il processo comunica l'esito delle operazioni agli sviluppatori. In questo modo le nuove parti di codice sono costantemente controllate riducendo al minimo la potenziale presenza di bug, migliorando in tutto e per tutto la qualità del progetto.
+Un fattore molto importante è la stesura di test: più questi hanno una copertura maggiore, più saranno lenti nell'esecuzione e rallenteranno il processo di integrazione. È essenziale quindi calibrare la loro copertura secondo le esigenze del progetto, ricordando che una aumentando la copertura si riduce il rischio di inserire codice bacato.
 
-\paragraph{Continuous delivery} La distribuzione è l'insieme delle operazioni atte a consegnare il software agli utenti finali.
-
-\paragraph{Le pipeline}
+\paragraph{Continuous delivery} La distribuzione è l'insieme delle operazioni atte a consegnare il software agli utenti finali. Essa estende l'integrazione continua e permette di avere sempre a disposizione un artefatto di build pronto ad essere rilasciato il quale ha superato il processo di testing. La distribuzione può avvenire anch'essa in modo automatico o attraverso l'approvazione manuale di uno sviluppatore. 
 
 \subsection{Un software complesso: Alchemist}\label{sec:alchemist}
-
-(Cos'è alchemist, utilizzo, tecnologie utilizzate, architettura, progettazione)
+Alchemist\cite{Pianini_2013} è un framework open-source sviluppato dall'Università di Bologna, progettato per modellare elementi di programmazione pervasiva.
 
 \paragraph{Open source}
+Il simulatore, come già citato, è un progetto open-source, ossia distribuito sotto termini di una licenza aperta. Questa permette a tutti di osservare il codice sorgente e di contribuire allo sviluppo del progetto, coordinato da un personale responsabile del suo avanzamento. La natura open-source del progetto apre le porte a modalità di sviluppo del codice differenti rispetto a team di dimensioni ridotte. In un progetto aperto i possibili sviluppatori che contribuiscono allo sviluppo sono potenzialmente infiniti, ragion per cui l'automazione è ancora più centrale e permette di tenere traccia della correttezza del codice fornito da utenti esterni. 
+
+% L'importanza del come si distribuisce il software
+% Quanto capillarmente
+
+\paragraph{Pipeline}
 
 \section{Obiettivi}
+I punti discussi precedentemente hanno evidenziato l'importanza che l'automazione ricopre all'interno dello sviluppo del software. La tecniche descritte dalla filosofia DevOps eliminano l'intervento umano garantendo un maggior controllo sulla qualità del prodotto rilasciato. 
 
-\subsection{Motivazioni}
-
-\paragraph{Struttura della tesi}
-
-La struttura di questo paper

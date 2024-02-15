@@ -85,7 +85,7 @@ Il simulatore Alchemist è estendibile, ed ottiene questa caratteristica sfrutta
 
 Una volta impacchettato l'applicativo, quest'ultimo è pronto per essere installato e utilizzato dall'utente finale. Nei paragrafi seguenti saranno esposte le tecniche utilizzate per garantire rilasci consistenti rispettando i requisiti che i repository coinvolti possiedono.
 
-\paragraph{Template} I soli pacchetti non sono sufficienti per pubblicare un applicativo, al contrario molto spesso questi non sono nemmeno necessari dal momento che i meta-dati associati contengono tutto l'occorrente per ottenerli. Quest'ultimi sono file descrittivi che seguono uno schema noto ed espongono le caratteristiche del pacchetto come autore, licenza, copyright, dipendenze e molti altri dettagli facoltativi e non. Spesso inoltre, lo schema richiede la presenza di un collegamento alla sorgente, ossia un \textit{url} localizzante il pacchetto in internet, di modo che non è necessario per i repository ospitare il pacchetto vero e proprio, ma solo un riferimento a questo. La piattaforma GitHub consente al rilascio di una nuova versione di pubblicare \textit{asset} ospitati dalla piattaforma stessa. L'url associato agli asset segue uno schema predefinito rendendolo facilmente riproducibile, come indicato nella figura \ref{fig:github-assets-url}.
+\paragraph{Template} Spesso inoltre, lo schema richiede la presenza di un collegamento alla sorgente, ossia un \textit{url} localizzante il pacchetto in internet, di modo che non è necessario per i repository ospitare il pacchetto vero e proprio, ma solo un riferimento a questo. La piattaforma GitHub consente al rilascio di una nuova versione di pubblicare \textit{asset} ospitati dalla piattaforma stessa. L'url associato agli asset segue uno schema predefinito rendendolo facilmente riproducibile, come indicato nella figura \ref{fig:github-assets-url}.
 \begin{figure}[htb]\label{fig:github-assets-url}
 	\centering
 	\texttt{https://github.com/<PROPRIETARIO>/<NOME-APPLICATIVO>/\\ \tab releases/download/<VERSIONE>/<NOME-FILE>}
@@ -98,16 +98,22 @@ Una volta impacchettato l'applicativo, quest'ultimo è pronto per essere install
 
 Come discusso in sezioni precedenti, i pacchetti su Arch Linux e più specificatamente \ac{aur}, sono descritti attraverso un file denominato PKGBUILD, il quale non è altro che uno script bash applicante uno schema predefinito. Tra i vari parametri alcuni di questi necessariamente cambiano ad ogni rilascio: la versione, la sorgente ed il checksum. Per rispondere a queste necessità ho introdotto un task nel build system incaricato di generare lo script PKGBUILD attraverso un \textit{template}. Il task \texttt{generatePKGBUILD} legge un file, detto template, contenente caratteri speciali con la funzione di segnaposto, sostituisce questi con i valori corretti e restituisce in output lo script pronto per essere installato. Nell'ottica di supportare test locali, attraverso un flag è possibile forzare l'inserimento di una sorgente locale, ossia il nome del pacchetto RPM.
 
-\paragraph{Script}
-
 \section{Sviluppo della pipeline}
 
-Per soddisfare i requisiti di automazione è stato necessario aggiornare l'architettura della pipeline di Alchemist. In particolare l'obiettivo consiste nell'estendere le sue funzionalità mantenendo l'attuale struttura.
+Per soddisfare i requisiti di automazione è stato necessario aggiornare l'architettura della pipeline di Alchemist. Innanzitutto, il flusso di integrazione richiede modifiche atte ad abilitare la generazione e la verifica dei pacchetti. Il processo di pacchettizzazione rientra nella fase di assemblaggio in quanto genera artefatti quali saranno successivamente rilasciati al pubblico. Come discusso precedentemente jpackage non è cross-platform, ragion per cui attraverso la strategia a matrice la definizione si comunica alla pipeline di moltiplicare l'esecuzione del job in più unità con parametri differenti. In questo caso definiamo all'interno della matrice un parametro \texttt{os} con associato la lista dei sistemi operativi su cui vogliamo eseguire il job. Mediante il parametro \texttt{runs-on} indichiamo il parametro introdotto dalla matrice, generando quindi tre diverse istanze con i tre sistemi operativi differenti. 
+L'esecuzione del job coinvolge diverse action: 
+\begin{itemize}
+	\item checkout, la quale clona il repository del progetto all'interno della cartella di lavoro del runner.
+	\item upload-artifact, azione che permette di caricare dei file i quali possono essere scaricati da altri job.
+\end{itemize}
+% Spiegare upload download artifact, generazione dei jar solo su linux e dei pacchetti
 
 \lstinputlisting[float,language=Kotlin,label={lst:package-generation}, caption={Il job incaricato alla generazione dei pacchetti}]{listings/package-generation.yml}
 
+% Un overview dell'architettura generale
+
 \subsection{Test dei processi}
 
-\section{Valutazione}
+% Il test dei processi introdotti
 
-%-Cosa cambiare, ottimizzazioni
+\section{Valutazione}
