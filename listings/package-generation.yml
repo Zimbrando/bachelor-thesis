@@ -2,14 +2,9 @@ assemble:
   needs:
     - select-java-version
   strategy:
-    fail-fast: false
     matrix:
       os: [ windows-2022, macos-12, ubuntu-22.04 ]
   runs-on: ${{ matrix.os }}
-  timeout-minutes: 180
-  concurrency:
-    group: ${{ github.workflow }}-build-${{ matrix.os }}-${{ github.event.number || github.ref }}
-    cancel-in-progress: true
   steps:
     - name: Checkout
       uses: danysk/action-checkout@0.2.14
@@ -23,6 +18,7 @@ assemble:
         name: installer-package-${{ runner.os }}
         path: build/package/*
         if-no-files-found: error
+    # Solamente un sistema operativo esegue i successivi step
     - name: Generate jars
       if: ${{ runner.os == 'Linux' }}
       run: ./gradlew shadowJar
