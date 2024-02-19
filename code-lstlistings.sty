@@ -9,9 +9,12 @@
 \Crefname{lstlisting}{Listing}{Listing}
 \renewcommand\lstlistlistingname{List of Listings}
 
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
 \lstset{
+	backgroundcolor=\color{backcolour},
 	showstringspaces=false,
-	basicstyle=\scriptsize\ttfamily,
+	basicstyle=\normalsize\ttfamily,
 	commentstyle={\color{olive}},
 	identifierstyle=\color{black},
 	ndkeywordstyle={\color{blue}},
@@ -24,8 +27,8 @@
 	numbersep=10pt,
 	tabsize=2,
 	extendedchars=true,
-	frame=trBL,
-	frameround=fttt,
+	frame=tb,
+	%frameround=fttt,
 }
 
 \lstdefinelanguage{Kotlin}{
