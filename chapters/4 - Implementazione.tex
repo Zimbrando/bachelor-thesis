@@ -76,7 +76,7 @@ Autonomamente lo script: (i) cerca tra i pacchetti disponibili quello indicato d
 
 \section{Sviluppo della pipeline}
 
-L'implementazione descritta consente attraverso l'utilizzo del build system di generare i pacchetti ed i corrispondenti meta-dati richiesti per la distribuzione. Il passo successivo è integrare la loro esecuzione all'interno della pipeline, in modo da conseguire gli obiettivi di integrazione e distribuzione continua. La sfida principale consiste nell'inserire i nuovi step senza stravolgere la struttura ed il flusso iniziale.
+L'implementazione descritta consente attraverso l'utilizzo del build system di generare i pacchetti ed i corrispondenti meta-dati richiesti per la distribuzione. Il passo successivo è integrare la loro esecuzione all'interno della pipeline, in modo da conseguire gli obiettivi di integrazione e distribuzione continua. La sfida principale consiste nell'inserire i nuovi step senza stravolgere la struttura del flusso iniziale.
 
 \subsection{Generazione degli artefatti}
 
@@ -126,11 +126,11 @@ L'implementazione descritta soddisfa i requisiti funzionali posti durante l'anal
 
 Lo sviluppo della pipeline ha richiesto diverse revisioni prima di ottenere il risultato finale voluto. Il flusso di integrazione e distribuzione continua per sua natura è innescato continuamente ed è perciò fondamentale sfruttare le funzionalità fornite dall'API di Actions per ottimizzare e ridurre i tempi di esecuzione di esso nel complesso. Per ottenere l'ottimizzazione desiderata esistono diverse accortezze nella configurazione dei workflow capaci di registrare incrementi prestazionali contenuti, ma che nel lungo periodo impattano positivamente lo sviluppo progetto. Le principali ottimizzazioni utilizzate sono elencate di seguito.
 \begin{itemize}
-	\item fail-fast
-	\item concurrency group
-	\item upload
-	\item timeout
-	\item build system
+	\item \textbf{Fail-fast}: questa ottimizzazione si applica ai flussi di lavoro che definiscono una strategia a matrice. Se il fail-fast è abilitato, la piattaforma annullerà tutti i compiti in corso e in coda nella matrice non appena uno qualsiasi dei compiti in essa fallisce.
+	\item \textbf{Concurrency group}: consente di inserire job all'interno di gruppi, identificati da una chiave, nella quale un solo job per volta viene eseguito. Normalmente Actions permette l'esecuzione dello stesso workflow, job e step parallelamente, ciò significa che la pubblicazione di diversi commit rapidamente  innesca l'esecuzione di più flussi paralleli. Se il flag \texttt{cancel-in-progress} è attivo e durante l'esecuzione di un job un altro componente dello stesso gruppo viene inserito in coda, quest'ultimo prende il posto ed elimina il job corrente.
+	\item \textbf{Artefatti}: l'utilizzo delle action \textit{upload-artifact} e \textit{download-artifact} consentono di distribuire gli artefatti tra i job dei workflow. In generale, l'approccio preferibile è di stabilire dei job assemblatori che generano e forniscono gli artefatti a successivi job di test o rilascio. Il caricamento di file anche di notevoli dimensioni è estremamente più conveniente rispetto alla rigenerazione, file di dimensioni dell'ordine delle centinaia di megabyte sono processati in poche decine di secondi.
+	\item \textbf{Timeout}: invece di fare affidamento sul timeout predefinito dei compiti, che è di 360 minuti (6 ore), i flussi di lavoro possono impostare esplicitamente un timeout personalizzato. L'opzione risulta efficace per interrompere i flussi di lavoro che si protraggono inutilmente a lungo, il che può essere particolarmente utile per evitare che i contributori, tramite pull request, inneschino flussi di lavoro prolungati.
+	\item \textbf{Build system}: esso, nel caso specifico di Gradle, introduce un overhead dettato dalla necessità ad ogni esecuzione di effettuare le fasi di inizializzazione e configurazione. Sebbene implementi tecniche di ottimizzazione, l'utilizzo di Gradle, in particolare nei progetti di grandi dimensioni, può incrementare il tempo di esecuzione di un job di diversi minuti.
 \end{itemize}
 
 
