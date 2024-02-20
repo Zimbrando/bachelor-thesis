@@ -5,9 +5,9 @@
 % LISTING CONFIGURATIONS
 %-----------------------------------------------------
 
-\crefname{lstlisting}{listing}{listing}	
-\Crefname{lstlisting}{Listing}{Listing}
-\renewcommand\lstlistlistingname{List of Listings}
+\crefname{lstlisting}{listing}{listato}	
+\Crefname{lstlisting}{Listing}{Listato}
+\renewcommand\lstlistlistingname{Elenco dei listati}
 
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
@@ -43,8 +43,8 @@
 }
 
 \lstdefinelanguage{Bash}{
-	comment=[l]{//},
-	emph={jdeps, jlink},
-	keywords={jdeps, jlink},
+	comment=[l]{\#},
+	emph={jdeps, jlink, jpackage},
+	keywords={jdeps, jlink, jpackage},
 	sensitive=true
 }

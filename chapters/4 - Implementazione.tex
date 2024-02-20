@@ -14,7 +14,7 @@ La capacità di sovrascrivere le configurazioni dei toolset ha permesso di otten
 
 \lstinputlisting[float=htb,language=Bash,label={lst:jlink-runtime-image-creation}, caption={Comandi utilizzati per generare una runtime-image ad-hoc}]{listings/jpackage-jlink.sh}
 
-\def\arraystretch{1}
+\def\arraystretch{1.2}
 \begin{table}[htb]
 	\label{fig:jpackage-options}
 	\begin{tabular}{|l|l|l|}
@@ -27,10 +27,10 @@ La capacità di sovrascrivere le configurazioni dei toolset ha permesso di otten
 		Tipologia di pacchetto in output &
 		\begin{tabular}[c]{@{}l@{}}rpm, deb, exe, msi, \\ pkg, dmg\end{tabular} \\ \hline
 		\texttt{--input} &
-		\begin{tabular}[c]{@{}l@{}}Directory contenente i file\\ da impacchettare\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Directory contenente i file\\ che comporranno l'application-image \end{tabular} &
 		Percorso alla directory \\ \hline
 		\texttt{--main-jar} &
-		\begin{tabular}[c]{@{}l@{}}L'archivio JAR principale\\ contenete la classe principale\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}L'archivio JAR principale \\ utilizzato all'avvio \end{tabular} &
 		Percorso del JAR \\ \hline
 		\texttt{--main-class} &
 		\begin{tabular}[c]{@{}l@{}}La classe che contiene la \\ funzione di avvio\end{tabular} &
@@ -80,7 +80,7 @@ L'implementazione descritta consente attraverso l'utilizzo del build system di g
 
 \subsection{Generazione degli artefatti}
 
-Innanzitutto, il flusso richiede l'inserimento di nuovi processi incaricati di assemblare e generare gli artefatti richiesti per la distribuzione, ovvero il software impacchettato. Durante l'analisi dello strumento jpackage è stata evidenziata l'assenza del supporto al cross-platform, è necessario quindi delegare a runner con sistemi operativi differenti la generazione degli artefatti. La piattaforma Actions fornisce la possibilità di configurare una \textbf{strategia a matrice}, (listato \ref{lst:matrix-strategy}) la quale consente di eseguire tanti job quante sono le possibili combinazioni differenti dei parametri espressi nella matrice. In questo modo descrivendo un solo job, in fase di esecuzione otteniamo diversi job paralleli i quali svolgono le stesse azioni, ma con un sistema operativo differente. Mediante l'utilizzo del build system richiediamo la generazione dei pacchetti, e successivamente carichiamo l'output utilizzando l'azione \texttt{actions/upload-artifact}, quest'ultima permette di trasferire file al di fuori del runner, in modo che successivi job possano scaricare il loro contenuto. 
+Innanzitutto, il flusso richiede l'inserimento di nuovi processi incaricati di assemblare e generare gli artefatti richiesti per la distribuzione, ovvero il software impacchettato. Durante l'analisi dello strumento jpackage è stata evidenziata l'assenza del supporto al cross-platform, è necessario quindi delegare a runner con sistemi operativi differenti la generazione degli artefatti. La piattaforma Actions fornisce la possibilità di configurare una \textbf{strategia a matrice}, (\cref{lst:matrix-strategy}) la quale consente di eseguire tanti job quante sono le possibili combinazioni differenti dei parametri espressi nella matrice. In questo modo descrivendo un solo job, in fase di esecuzione otteniamo diversi job paralleli i quali svolgono le stesse azioni, ma con un sistema operativo differente. Mediante l'utilizzo del build system richiediamo la generazione dei pacchetti, e successivamente carichiamo l'output utilizzando l'azione \texttt{actions/upload-artifact}, quest'ultima permette di trasferire file al di fuori del runner, in modo che successivi job possano scaricare il loro contenuto. 
 
 \lstinputlisting[float=htb,language=Kotlin,label={lst:matrix-strategy}, caption={Utilizzo della strategia a matrice per configurare job paralleli}]{listings/matrix-strategy.yml}
 
@@ -121,7 +121,7 @@ La verifica dei pacchetti richiede l'utilizzo di programmi specifici i quali dip
 Inizialmente il task era posto come dipendente dall'esecuzione di jpackage, in modo che l'esecuzione del test garantisse la presenza dei pacchetti. Questo comportamento tuttavia costringe la generazione dei pacchetti ogniqualvolta si voglia eseguire la verifica. Ciò accade perché il task fornitoci dal plugin \texttt{jpackage-gradle-plugin} non dichiara alcun \textit{output}, quindi Gradle non consente di utilizzare la funzionalità della \textit{build incrementale}. In altre parole, il build system non conosce l'output del task generatore e in caso i pacchetti siano già presenti, come accade nella pipeline perché generati da job precedenti, esso riesegue la generazione sovrascrivendo gli ultimi. La rimozione della dipendenza garantisce un incremento delle prestazioni, permettendo di dividere le attività in due unità di esecuzione differenti. Il costo è una minor chiarezza nell'utilizzo manuale del task, in quanto l'esecuzione del task di verifica senza previa generazione fallirà per l'assenza dei pacchetti. Siccome il test è sviluppato principalmente per l'utilizzo all'interno di pipeline, questa limitazione non genera particolari problematiche, generalmente gli sviluppatori non eseguiranno il task sulla propria macchina, e in caso fosse necessario è sufficiente indicare l'esecuzione del task generatore assieme a quello di verifica.
 
 \section{Valutazione ed ottimizzazione}
-% ottimizzazione, fail fast, dipendenze gradle, concurrency group, upload artifact, confronto
+
 L'implementazione descritta soddisfa i requisiti funzionali posti durante l'analisi. Lo sviluppo di nuovi processi all'interno del build system hanno consentito la pacchettizzazione del software per le piattaforme richieste mediante uno strumento esterno, jpackage. Funzionalità fornite da quest'ultimo hanno inoltre permesso una personalizzazione più approfondita dei pacchetti generati, permettendo l'esecuzione di comandi post-installazione e di conseguenza eliminando la necessità di configurazione da parte dell'utente finale. L'integrazione dei processi e delle relative verifiche all'interno della pipeline ha dato luce ad un flusso di continouous delivery completo, capace di rispondere alle esigenze dettate dalla filosofia DevOps.
 
 Lo sviluppo della pipeline ha richiesto diverse revisioni prima di ottenere il risultato finale voluto. Il flusso di integrazione e distribuzione continua per sua natura è innescato continuamente ed è perciò fondamentale sfruttare le funzionalità fornite dall'API di Actions per ottimizzare e ridurre i tempi di esecuzione di esso nel complesso. Per ottenere l'ottimizzazione desiderata esistono diverse accortezze nella configurazione dei workflow capaci di registrare incrementi prestazionali contenuti, ma che nel lungo periodo impattano positivamente lo sviluppo progetto. Le principali ottimizzazioni utilizzate sono elencate di seguito.
@@ -133,4 +133,33 @@ Lo sviluppo della pipeline ha richiesto diverse revisioni prima di ottenere il r
 	\item \textbf{Build system}: esso, nel caso specifico di Gradle, introduce un overhead dettato dalla necessità ad ogni esecuzione di effettuare le fasi di inizializzazione e configurazione. Sebbene implementi tecniche di ottimizzazione, l'utilizzo di Gradle, in particolare nei progetti di grandi dimensioni, può incrementare il tempo di esecuzione di un job di diversi minuti.
 \end{itemize}
 
+Si propone dunque un'analisi di quattro differenti versioni di pipeline sviluppate per Alchemist. La prima (\textit{a}) rappresenta il processo di integrazione e distribuzione continua utilizzato prima dell'intervento del progetto descritto in questo elaborato. Ciò ci consente di misurare il risultato ottenuto con le successive versioni in relazione al requisito non funzionale prestazionale introdotto in fase di analisi. La seconda (\textit{b}) descrive una struttura a job paralleli, la quale utilizza il build system sia per generare che per testare gli artefatti. La terza (\textit{c}) versione utilizza una configurazione sequenziale con distribuzione degli artefatti mediante le azioni di \texttt{upload/download-artifact}, mentre la quarta (\textit{d}), ed ultima versione, utilizza una configurazione prevalentemente sequenziale con caricamento degli artefatti, ma privata dell'utilizzo del build system nei job adibiti ai test. I tempi presi in esame sono ottenuti mediante la media aritmetica di dieci differenti esecuzioni dei flussi: l'\textit{execution time} indica il tempo di esecuzione del flusso nel suo complesso, mentre la \textit{total execution time} fa riferimento alla somma dei tempi di esecuzione di tutti i job all'interno della pipeline. Le quattro istanze prese in esame coinvolgono il normale flusso di integrazione e quindi non integrano l'esecuzione del job di rilascio.
 
+\begin{figure}[htb]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			ybar,
+            width=12cm,
+			height=8cm,
+			bar width=15,
+			ylabel={ Time (h) },
+			symbolic x coords={a, b, c, d},
+			xtick=data,
+			xlabel={Version},
+			legend style={at={(0.5,-0.2)},
+				anchor=north,legend columns=-1},
+			]
+			
+			\addplot[blue!50!cyan,fill=blue!50!cyan] coordinates {(a, 0.81) (b, 0.77) (c, 1.12) (d, 0.74)};
+			\addplot[red!70!orange,fill=red!70!orange] coordinates {(a, 2.12) (b, 2.55) (c, 3.11) (d, 2.78)};
+			
+            % Draw horizontal lines
+			\legend{Execution Time, Total Execution Time}
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Confronto delle metriche di tempo di esecuzione delle pipeline}
+	\label{fig:histogram}
+\end{figure}
+ 
+Innanzitutto, i risultati confermano un ottimo riscontro in relazione al requisito non funzionale, in particolare le due versioni \textit{b} e \textit{d} offrono prestazioni comparabili e contemporaneamente funzionalità aggiuntive rispetto la prima versione. L'utilizzo del build system peggiora notevolmente le prestazioni, la quarta versione offre un miglioramento sostanziale rispetto la terza, la quale utilizza una configurazione similarmente sequenziale. La versione \textit{b} ottiene risultati comparabili alla quarta, sebbene questa non utilizzi il caricamento e scaricamento degli artefatti. Ciò è dovuto alla mancanza del rilascio all'interno dei processi analizzati, mentre la versione \textit{d} ottiene gli artefatti da job eseguiti precedentemente, la \textit{b} li genera nuovamente. Lo stesso test condotto su esecuzioni del flusso completo avrebbero decretato un netto vantaggio della quarta versione rispetto le altre prese in esame.

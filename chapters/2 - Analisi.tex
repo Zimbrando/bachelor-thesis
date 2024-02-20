@@ -1,4 +1,5 @@
 %!TEX root = ../thesis-main.tex
+
 \chapter{Analisi}
 
 \section{Requisiti}
@@ -30,7 +31,7 @@ I requisiti del gruppo successivo sono accumunabili per il loro scopo, vale a di
 \paragraph{Requisiti non funzionali}
 
 \begin{itemize}
-	\item Trattandosi Alchemist di un software in continuo sviluppo, è auspicabile l'utilizzo degli strumenti già impiegati all'interno del repository. \\ L'integrazione di nuovi applicativi deve essere eseguita solo se strettamente necessaria.
+	\item Trattandosi Alchemist di un software in continuo sviluppo, è auspicabile l'utilizzo degli strumenti già impiegati nel progetto. \\ L'integrazione di nuovi applicativi deve essere eseguita solo se strettamente necessaria.
 	\item La pipeline \ac{cicd} ottenuta deve garantire prestazioni in linea con la versione precedente l'intervento di questo progetto.
 \end{itemize}
 
@@ -138,6 +139,6 @@ Nei sistemi operativi Linux il controllo dei componenti installati nella macchin
 Nell'ottica di soddisfare il requisito multi-piat\-ta\-for\-ma del progetto è necessario analizzare le piattaforme di destinazione elencate. Data la natura closed-source di Windows e MacOs, i due sistemi operativi non richiedono particolari attenzioni dato che le tipologie di pacchetti generabili da jpackage sono sufficienti ed ufficialmente supportati. Linux al contrario è notevolmente frammentato, ogni distribuzione è libera di utilizzare il package management system preferito o di inventare una tipologia di pacchetto completamente nuova. Purtroppo non esistono statistiche ufficiali riguardo la diffusione delle distribuzioni, molte di esse si basano su stime o utilizzano dati non attendibili. Dall'altro lato analizzando i pacchetti generabili da jpackage possiamo trarre delle conclusioni.
 \begin{itemize}
 	\item RPM significa ``RedHat Package Manager", progettato per RedHat e le distribuzioni derivate, risulta diffuso inoltre su Fedora, CentOs, OpenSUSE e tante altre distribuzioni. 
-	\item DEB è l'abbreviazione di ``Debian packages", supportato da Debian e le distribuzioni derivate. Secondo distrowatch.com Debian Linux presenta più di 400 distribuzioni derivate e più di 120 di queste sono attive.
+	\item DEB è l'abbreviazione di ``Debian packages", supportato da Debian e le distribuzioni derivate. Secondo distrowatch\footnote{https://distrowatch.com/} Debian Linux presenta più di 400 distribuzioni derivate e più di 120 di queste sono attive.
 \end{itemize}
 È evidente come le due tipologie coprono un ampio spettro nel panorama Linux. Queste due tipologie sono inoltre supportate nativamente da PKGBUILD, il quale autonomamente estrae il loro contenuto lasciando allo sviluppatore solamente il compito di riposizionare esso nel filesystem del sistema installante. Il supporto ai pacchetti snap fornisce un ulteriore livello di compatibilità essendo di fatto considerato una tipologia universale nel mondo Linux.
