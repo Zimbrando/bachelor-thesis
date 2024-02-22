@@ -1,15 +1,24 @@
 %!TEX root = ../thesis-main.tex
 
 \chapter{Conclusioni}
-% Dimostrare i link con le release, installazione da AUR e da Winget
+% Dimostrare i link con le release, installazione da AUR e da Wing
+Quanto discusso nell'elaborato nel suo complesso ha consentito la distribuzione del software Alchemist in modo automatico in formati standard delle piattaforme coinvolte, all'interno di due principali repository pubblici rappresentanti due famiglie di sistemi operativi completamente differenti. Gli obiettivi posti sono stati raggiunti grazie ad una valutazione degli strumenti adibiti alla pacchettizzazione che il panorama \ac{jvm} offre, e grazie all'utilizzo di tecnologie come Gradle e GitHub Actions, sono state integrate all'interno del flusso di integrazione e distribuzione continua del progetto. L'autovalutazione ha poi evidenziato come migliorare il lavoro svolto mediante tecniche di ottimizzazione.
 
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=.8\linewidth]{figures/alchemist-aur.png}
+	\caption{Pagina web raffigurante il pacchetto Alchemist pubblicato sul repository AUR}
+	\label{fig:aur-web}
+\end{figure}
+
+Il conseguimento degli obiettivi è osservabile su GitHub nella sezione dei rilasci\footnote{https://github.com/AlchemistSimulator/Alchemist/releases}, dove è possibile notare la possibilità di scaricare i diversi pacchetti installanti per ogni sistema operativo. Mediante invece l'utilizzo dei package manager è possibile installare ed aggiornare Alchemist con l'utilizzo di un semplice comando. Su Windows, previa installazione di winget, attraverso:
+\texttt{winget install Unibo.alchemist}
+e su Arch e derivate, previa autorizzazione all'installazione dall'Arch User Repository\footnote{https://aur.archlinux.org/packages/alchemist}(\Cref{fig:aur-web}), tramite \texttt{pamac} per Manjaro o più generalmente \texttt{yay}.
+L'utilizzo dei package manager assicura all'utente l'installazione dell'ultima versione di Alchemist e mediante le funzionalità da questo offerte è altrettanto semplice aggiornare la sua versione, in modo da garantire l'utilizzo agli utenti delle ultime funzionalità e correzioni. 
 
 \section{Sviluppi futuri}
-
-L'implementazione descritta da questo elaborato ha consentito la distribuzione del software in diversi 
-
+L'implementazione descritta da questo elaborato ha aperto nuove possibilità di distribuzione del progetto mediante l'introduzione della pacchettizzazione. Attraverso lo sviluppo di processi automatici di pubblicazione il software è stato distribuito all'interno di due principali repository di riferimento. Le possibilità di estensione del progetto sono numerose, in quanto esistono molteplici package manager nel panorama esteso dei sistemi operativi. Nei seguenti punti sono riassunti i principali spunti per migliorare ed estendere il processo:
 \begin{itemize}
-	\item \textbf{Distribuzione su Homebrew}: le piattaforme su cui Alchemist è distribuito non comprendono il sistema operativo MacOs. Ciò è dovuto alla necessità di utilizzare un dispositivo che utilizza il sistema operativo per verificare la corretta integrazione. Il package manager Homebrew rappresenta una valida opzione per ampliare maggiormente il bacino di utenti di Alchemist.
-	\item \textbf{Reflection e jlink}: l'utilizzo di Jlink
-	\item \textbf{Supporto a Snap e Flatpak}: i pacchetti containerizzati offrono una valida alternativa e coprono una vasta gamma di distribuzioni dell'ambiente Linux. La loro implementazione nel flusso di integrazione e distribuzione continua di Alchemist contribuirebbe ad un ampliamento delle piattaforme supportate dal software. % Add stuff
+	\item \textbf{Distribuzione su Homebrew}: i repository su cui Alchemist è distribuito non comprendono il sistema operativo MacOs. Il package manager Homebrew realizzato per MacOs rappresenta una valida opzione per raggiungere un pubblico più ampio attraverso modalità di installazione semplici e funzionali.
+	\item \textbf{Supporto a Snap}: i pacchetti containerizzati offrono una valida alternativa e coprono una vasta gamma di distribuzioni dell'ambiente Linux. La loro implementazione nel flusso di integrazione e distribuzione continua di Alchemist contribuirebbe ad un ulteriore ampliamento delle distribuzioni supportate dal software. 
 \end{itemize}
