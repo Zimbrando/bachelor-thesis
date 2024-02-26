@@ -13,10 +13,20 @@
 
 % Commands
 \newcommand\tab[1][1cm]{\hspace*{#1}}
+\newcommand{\imagesource}[5] {
+	\begin{figure}[htb]
+		\centering
+		\includegraphics[width=#4\linewidth]{#1}
+		\caption{#3}
+		{\scriptsize%
+			Source: \url{#2}}
+		\label{fig:#5}
+	\end{figure}
+}
 
 \school{\unibo}
 \programme{Corso di Laurea in Ingegneria e Scienze Informatiche}
-\title{Monitoraggio Ed Automazione Della Distribuzione Di Software Complessi}
+\title{Pacchettizzazione e Distribuzione Automatizzata di Software JVM-Based}
 \author{Marco Sternini}
 \date{\today}
 \subject{Programmazione ad oggetti}

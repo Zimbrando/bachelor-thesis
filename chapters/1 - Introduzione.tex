@@ -19,7 +19,7 @@ Le nozioni fornite dalla cultura DevOps ricoprono diversi ambiti e non si limita
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=.9\linewidth]{figures/devops-process.png}
+	\includegraphics[width=.8\linewidth]{figures/devops-process.png}
 	\caption{Le fasi della metodologia DevOps}
 	\label{fig:devops-process}
 	%https://italiancoders.it/introduzione-al-devops/
@@ -39,13 +39,8 @@ Il modello illustrato nella figura \ref{fig:devops-process} rappresenta la visio
 \subsection{Un software complesso: Alchemist}\label{sec:alchemist}
 Alchemist\cite{Pianini_2013} è un framework di simulazione open-source sviluppato dall'Università di Bologna, progettato per modellare elementi di programmazione pervasiva. Per comprendere l'ambito del progetto è necessario introdurre il concetto di simulazione in ambito scientifico. Per simulazione si intende un modello della realtà, costruito secondo le regole di un analista, sviluppato per consentire la valutazione dello svolgersi di una serie di eventi in un ambiente definito. Lo svolgimento di una simulazione avviene all'interno di un arco di tempo discreto suddiviso in unità di tempo predefinite definite come \textit{step}. Alchemist, consente di creare, osservare ed analizzare simulazioni atte a modellare interazioni tra agenti autonomi in ambienti dinamici: ossia scenari di \textit{aggregate} e \textit{nature-inspired computing}. Una rappresentazione del meta-modello, ossia le entità e relazioni configurabili, è raffigurata nella \cref{fig:alchemist-metamodel}.
 
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=.9\linewidth]{figures/alchemist-metamodel.pdf}
-	\caption{Il meta-modello di Alchemist}
-	\label{fig:alchemist-metamodel}
-	%https://alchemistsimulator.github.io/explanation/metamodel/
-\end{figure}
+\imagesource{figures/alchemist-metamodel.pdf}{https://alchemistsimulator.github.io/explanation/metamodel/}{Il meta-modello di Alchemist}{.9}{alchemist-metamodel}
+
 
 \paragraph{Architettura}
 Il framework è realizzato mediante linguaggi \ac{jvm} (ossia eseguibili all'interno di macchine virtuali java), più precisamente Java e Kotlin, utilizzando una struttura modulare ed estendibile. Il simulatore, come già citato, è un progetto open-source, ossia distribuito sotto termini di una licenza aperta. Questa permette a tutti di osservare il codice sorgente e di contribuire allo sviluppo del progetto, coordinato da un personale responsabile del suo avanzamento. La natura open-source del progetto apre le porte a modalità di sviluppo del codice differenti rispetto a team di dimensioni ridotte. In un progetto aperto gli utenti che contribuiscono allo sviluppo sono potenzialmente infiniti, ragion per cui l'automazione risulta determinante per mantenere un processo ordinato e controllato di integrazione e rilascio del software.

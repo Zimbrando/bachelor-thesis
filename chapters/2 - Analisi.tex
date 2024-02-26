@@ -74,12 +74,7 @@ Gradle\footnote{https://gradle.org/} è uno dei tanti strumenti disponibili, sup
 	\item \textbf{Fase di esecuzione}: infine, Gradle esegue i task richiesti considerando le dipendenze descritte nel grafo generato nella fase precedente.
 \end{enumerate}
 
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=1\linewidth]{figures/gradle-build-lifecycle-example.png}
-	\caption{Esempio di inizializzazione, configurazione ed esecuzione di una build Gradle}
-	\label{fig:gradle-build-lifecycle}
-\end{figure}
+\imagesource{figures/gradle-build-lifecycle-example.png}{https://docs.gradle.org/current/userguide/build_lifecycle.html}{Esempio di inizializzazione, configurazione ed esecuzione di una build Gradle}{1}{gradle-build-lifecycle}
 
 Un componente chiave sono i plugin, i quali consentono di estendere le funzionalità di Gradle: aggiungere nuovi task, estendere il modello con nuovi elementi ed applicare configurazioni specifiche all'intero progetto. La presenza di diversi plugin base e creati dalla comunità rende Gradle uno strumento versatile.
 
@@ -93,13 +88,7 @@ Tramite Gradle lo sviluppatore è in grado di eseguire procedure articolate come
 
 GitHub Actions è una piattaforma di \ac{cicd} disponibile per i repository ospitati su GitHub, che consente la configurazione ed esecuzione di pipeline personalizzate, chiamate \textit{workflow}. Questi \textit{workflow} sono flussi di processi che consistono in un insieme di \textit{job} eseguiti sequenzialmente o parallelamente all'interno di macchine virtuali denominate \textit{runner}. I workflow (\cref{fig:github-actions-example}) sono descritti in file YAML all'interno di una cartella specifica del repository. Questi file definiscono i passaggi (\textit{step}) e le azioni (\textit{action}) che il runner deve eseguire all'interno di \textit{job}, macro-processi incaricati all'esecuzione sequenziale di step.
 
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=.9\linewidth]{figures/overview-actions-simple.png}
-	\caption{Sintesi dei componenti utilizzati su GitHub Actions ed esempio di un workflow} 
-	%source: https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions}
-	\label{fig:github-actions-example}
-\end{figure}
+\imagesource{figures/overview-actions-simple.png}{https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions}{Sintesi dei componenti utilizzati su GitHub Actions ed esempio di un workflow}{.9}{github-actions-example}
 
 Uno step, come citato precedentemente, rappresenta l'unità minima di esecuzione all'interno della piattaforma Actions. Le API supportano due differenti tipologie di step: (i) le azioni, ossia componenti riutilizzabili e parametrizzabili delegati all'esecuzione di una procedura specifica e (ii) i comandi shell. Le azioni possono essere create personalmente o riutilizzate attingendo da un vasto marketplace manutenuto dalla comunità.  Ad esempio, una delle azioni più diffuse e utilizzate è ``actions/checkout" [\cite{github-actions-diffusion}], la quale clona il repository del progetto nella cartella di lavoro corrente del runner.
 
