@@ -95,7 +95,7 @@ Tramite l'attributo \texttt{if} è consentito determinare se uno step deve esser
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.5\linewidth]{figures/generate-packages-job.pdf}
-	\caption{Diagramma dell'attività del job incaricato a generare gli artefatti}
+	\caption{Diagramma di attività del job incaricato a generare gli artefatti}
 	\label{fig:generate-packages-job}
 \end{figure}
 
@@ -110,7 +110,7 @@ Per abilitare la pubblicazione sull'Arch User Repository, è stato introdotto un
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.85\linewidth]{figures/release-flow.pdf}
-	\caption{Diagramma dell'attività raffigurante il processo di rilascio su AUR e Winget}
+	\caption{Diagramma di attività raffigurante il processo di rilascio su AUR e Winget}
 	\label{fig:release-flow}
 \end{figure}
 
@@ -139,7 +139,7 @@ Lo sviluppo della pipeline ha richiesto diverse revisioni prima di ottenere il r
 	\item \textbf{Build system}: esso, nel caso specifico di Gradle, introduce un overhead dettato dalla necessità a ogni esecuzione di effettuare le fasi di inizializzazione e configurazione. Sebbene implementi tecniche di ottimizzazione, l'utilizzo di Gradle, in particolare nei progetti di grandi dimensioni, può incrementare il tempo di esecuzione di un job di diversi minuti.
 \end{itemize}
 
-Si propone dunque un'analisi di quattro differenti versioni di pipeline sviluppate per Alchemist. La prima (\textit{a}) rappresenta il processo di integrazione e distribuzione continua utilizzato prima dell'intervento del progetto descritto in questo elaborato. Ciò ci consente di misurare il risultato ottenuto con le successive versioni in relazione al requisito non funzionale prestazionale introdotto in fase di analisi. La seconda (\textit{b}) descrive una struttura a job paralleli, la quale utilizza il build system sia per generare che per testare gli artefatti. La terza (\textit{c}) versione utilizza una configurazione sequenziale con distribuzione degli artefatti mediante le azioni di \texttt{upload/download-artifact}, mentre la quarta (\textit{d}), e ultima versione, utilizza una configurazione prevalentemente sequenziale con caricamento degli artefatti, ma privata dell'utilizzo del build system nei job adibiti ai test. I tempi presi in esame sono ottenuti mediante la media aritmetica di dieci differenti esecuzioni dei flussi: l'\textit{execution time} indica il tempo di esecuzione del flusso nel suo complesso, mentre la \textit{total execution time} fa riferimento alla somma dei tempi di esecuzione di tutti i job all'interno della pipeline. Le quattro istanze prese in esame coinvolgono il normale flusso di integrazione e quindi non integrano l'esecuzione del job di rilascio.
+Si propone dunque un'analisi di quattro differenti versioni di pipeline sviluppate per Alchemist. La prima (\textit{a}) rappresenta il processo di integrazione e distribuzione continua utilizzato prima dell'intervento del progetto descritto in questo elaborato. Ciò ci consente di misurare il risultato ottenuto con le successive versioni in relazione al requisito non funzionale prestazionale introdotto in fase di analisi. La seconda (\textit{b}) descrive una struttura a job paralleli, la quale utilizza il build system sia per generare che per testare gli artefatti. La terza (\textit{c}) versione utilizza una configurazione sequenziale con distribuzione degli artefatti mediante le azioni di \texttt{upload/download-artifact}, mentre la quarta (\textit{d}), e ultima versione, utilizza una configurazione prevalentemente sequenziale con caricamento degli artefatti, ma privata dell'utilizzo del build system nei job adibiti ai test. I tempi presi in esame sono ottenuti mediante la media aritmetica di dieci differenti esecuzioni dei flussi: il \textit{pipeline execution time} indica il tempo di esecuzione del flusso nel suo complesso, mentre il \textit{cumulative jobs execution time} fa riferimento alla somma dei tempi di esecuzione di tutti i job all'interno della pipeline. Le quattro istanze prese in esame coinvolgono il normale flusso di integrazione e quindi non integrano l'esecuzione del job di rilascio.
 
 \begin{figure}[htb]
 	\centering
@@ -161,7 +161,7 @@ Si propone dunque un'analisi di quattro differenti versioni di pipeline sviluppa
 			\addplot[red!70!orange,fill=red!70!orange] coordinates {(a, 2.12) (b, 2.55) (c, 3.11) (d, 2.78)};
 			
             % Draw horizontal lines
-			\legend{Execution Time, Total Execution Time}
+			\legend{Pipeline Execution Time, Cumulative Jobs Execution Time}
 		\end{axis}
 	\end{tikzpicture}
 	\caption{Grafico illustrante i tempi di esecuzione delle quattro differenti versioni di pipeline implementate}

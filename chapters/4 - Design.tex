@@ -15,7 +15,7 @@ La pipeline sfrutta il build system per generare i pacchetti di installazione de
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.9\linewidth]{figures/activity-interaction-diagram.pdf}
-	\caption{Diagramma delle attività raffigurante l'interazione tra i componenti}
+	\caption{Diagramma di attività raffigurante l'interazione tra i componenti}
 	\label{fig:activity-interaction-diagram}
 \end{figure}
 
@@ -51,13 +51,13 @@ Il programma jpackage, come illustrato nella sezione \ref{sec:packaging}, non è
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.8\linewidth]{figures/gradle-jpackage-scheme.pdf}
-	\caption{Diagramma delle attività rappresentante il processo di generazione dei pacchetti}
+	\caption{Diagramma di attività rappresentante il processo di generazione dei pacchetti}
 	\label{fig:gradle-jpackage-scheme}
 \end{figure}
 \noindent Come discusso nella precedente sezione il design divide la generazione nei tre sistemi operativi target e la sua esecuzione dipende da \texttt{al\-che\-mi\-st\--fu\-ll\-:sha\-dow\-Jar\-}: il task incaricato di generare l'archivio JAR full. In questo modo, quando il task incaricato di generare i pacchetti con jpackage viene invocato, in primo luogo Gradle genera l'archivio JAR necessario a jpackage per costruire un application image valido.
 
 \section{Pipeline}
-La pipeline è l'elemento chiave per generare l'automazione dei processi descritti. Alchemist è già provvisto di una pipeline, la quale si occupa di analizzare il codice, verificare i processi di rilascio e in caso sia necessario rilasciare una nuova versione. Il compito del design esplicato in questa sezione è quello di introdurre nuovi step con lo scopo di automatizzare la generazione e distribuzione dei pacchetti generati precedentemente. Le diverse unità di esecuzione o \textit{job} che popolano la pipeline possono essere distinti in base al loro ruolo.
+La pipeline è l'elemento chiave per generare l'automazione dei processi descritti. Alchemist è già provvisto di una pipeline, la quale si occupa di analizzare il codice, verificare i processi di rilascio e in caso sia necessario rilasciare una nuova versione. Il compito del design esplicato in questa sezione è quello di introdurre nuovi step con lo scopo di automatizzare la generazione e distribuzione dei pacchetti generati precedentemente. Le diverse unità di esecuzione o \textit{job} che popolano la pipeline possono essere distinti in base al loro ruolo:
 \begin{itemize}
 	\item \textbf{Inizializzazione}, tutte le unità incaricate di preparare l'ambiente di esecuzione della pipeline e quindi dei successivi job. 
 	\item \textbf{Build e analisi}, i job responsabili di analizzare, compilare ed eseguire i test del codice.
@@ -68,7 +68,7 @@ La pipeline è l'elemento chiave per generare l'automazione dei processi descrit
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.5\linewidth]{figures/pipeline-roles.pdf}
-	\caption{Diagramma dell'attività illustrante il flusso attraverso i ruoli delineati}
+	\caption{Diagramma di attività illustrante il flusso attraverso i ruoli delineati}
 	\label{fig:workflow-roles-summary}
 \end{figure}
 L'interazione dei processi nella pipeline è raffigurato nella \cref{fig:workflow-roles-summary}. L'\textbf{inizializza\-zio\-ne} trova spazio al primo posto e la sua esecuzione è strettamente necessaria per il proseguimento del flusso. L'\textbf{assemblaggio} e \textbf{build} sono eseguiti parallelamente mentre i \textbf{test} devono inevitabilmente dipendere dalla fase di assemblaggio per poter verificare l'output prodotto da quest'ultimo. Il \textbf{rilascio} infine, richiede che tutte le fasi descritte precedentemente siano eseguite con successo. I ruoli concernenti il lavoro descritto da questo elaborato sono: assemblaggio, test e rilascio.
@@ -81,7 +81,7 @@ Per conseguire gli obiettivi dettati dai ruoli di assemblaggio e test è necessa
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.18\linewidth]{figures/activity-diagram-job.pdf}
-	\caption{Diagramma dell'attività illustrante il comportamento dei job all'interno della pipeline}
+	\caption{Diagramma di attività illustrante il comportamento dei job all'interno della pipeline}
 	\label{fig:activity-diagram-job}
 \end{figure}
 
@@ -89,7 +89,7 @@ Come raffigurato nella \cref{fig:pipeline-activity-diagram}, la pipeline ottenut
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\linewidth]{figures/pipeline-result.pdf}
-	\caption{Diagramma dell'attività della pipeline risultante}
+	\caption{Diagramma di attività della pipeline risultante}
 	\label{fig:pipeline-activity-diagram}
 \end{figure}
 
